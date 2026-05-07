@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/companies")
-@CrossOrigin(origins = "*") // Permite que o App Mobile acesse a API
+@CrossOrigin(origins = "*")
 public class CompanyController {
 
     @Autowired

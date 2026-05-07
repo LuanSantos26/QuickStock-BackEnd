@@ -6,8 +6,7 @@
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
         <version>3.4.0</version>
-        <relativePath/>
-    </parent>
+        <relativePath/> </parent>
     <groupId>com.quickstock</groupId>
     <artifactId>backend</artifactId>
     <version>0.0.1-SNAPSHOT</version>
