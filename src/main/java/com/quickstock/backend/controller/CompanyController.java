@@ -1,22 +1,23 @@
 package com.quickstock.backend.controller;
 
 import com.quickstock.backend.model.Company;
-import com.quickstock.backend.repository.CompanyRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.quickstock.backend.service.CompanyService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/api/companies")
+@RequestMapping("/api/empresas")
 @CrossOrigin(origins = "*")
+@RequiredArgsConstructor
 public class CompanyController {
 
-    @Autowired
-    private CompanyRepository repository;
+    private final CompanyService service;
 
-    @PostMapping("/register")
-    public Company createCompany(@RequestBody Company company) {
-        // Apenas devolve o que recebeu para confirmar que a conexão funcionou
-        System.out.println("Recebido: " + company.getName());
-        return company;
+    @PostMapping
+    public ResponseEntity<Company> cadastrar(@RequestBody Company company) {
+        Company salvo = service.cadastrar(company);
+        return ResponseEntity.status(HttpStatus.CREATED).body(salvo);
     }
 }
