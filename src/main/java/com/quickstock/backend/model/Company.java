@@ -2,9 +2,11 @@ package com.quickstock.backend.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "companies")
+@Table(name = "empresas")
 @Data // O Lombok cria os getters e setters automaticamente
 public class Company {
 
@@ -12,9 +14,15 @@ public class Company {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String name;      // Referente ao "Nome da Empresa" no front
-    private String email;     // Referente ao "E-mail"
-    private String password;  // Referente à "Senha"
-    private String cnpj;      // Referente ao "CNPJ"
-    private String phone;     // Referente ao "Telefone"
+    @Column(nullable = false, length = 150)
+    private String nome;
+
+    @Column(nullable = false, unique = true, length = 18)
+    private String cnpj;
+
+    @Column(length = 20)
+    private String telefone;
+
+    @Column(name = "criado_em", nullable = false, updatable = false)
+    private LocalDateTime criadoEm = LocalDateTime.now();
 }
