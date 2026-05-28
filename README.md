@@ -1,52 +1,39 @@
-# QuickStock - Back-End 🚀
+# 📦 QuickStock - Back-End
 
-Este é o módulo de back-end da aplicação **QuickStock**, desenvolvido como projeto acadêmico para gerenciamento inteligente. O servidor foi construído utilizando Java com o ecossistema Spring Boot, focado em fornecer uma API REST para os cadastros de empresas e empreendedores.
+Bem-vindo ao repositório do **QuickStock**, um sistema back-end inteligente desenvolvido para o gerenciamento de estoque e vendas em eventos. A aplicação permite que empresas gerenciem múltiplos eventos, barracas, produtos, usuários (operadores) e o fluxo completo de pedidos e pagamentos.
 
-## 🛠️ Tecnologias Utilizadas
+A API foi construída em **Java com Spring Boot**, fornecendo endpoints RESTful robustos, com relacionamentos de dados bem definidos e hash de senhas para segurança básica.
 
-* **Java 17**: Linguagem principal do projeto.
-* **Spring Boot 3.4.0**: Framework para agilizar o desenvolvimento da API.
-* **Spring Data JPA**: Para persistência de dados e integração com banco de dados.
-* **H2 Database**: Banco de dados em memória utilizado para desenvolvimento e testes rápidos.
-* **Lombok**: Biblioteca para redução de código boilerplate (Getters/Setters).
-* **Maven**: Gerenciador de dependências e build do projeto.
+## 🚀 Tecnologias Utilizadas
 
-## 📋 Funcionalidades Atuais
+* **Java 17**: Linguagem de programação.
+* **Spring Boot 3.4.0**: Framework principal para construção da API REST.
+* **Spring Data JPA & Hibernate**: ORM para persistência e mapeamento de dados.
+* **PostgreSQL**: Banco de dados relacional principal.
+* **Spring Security Crypto (BCrypt)**: Para criptografia de senhas de usuários.
+* **Lombok**: Redução de código boilerplate (getters, setters, construtores).
+* **Maven**: Gerenciador de dependências.
 
-* **Cadastro de Empresas**: Endpoint para receber e salvar dados de novas empresas (CNPJ, Nome, E-mail, etc).
-* **Cadastro de Usuários (Empreendedores)**: Endpoint para registro de usuários individuais.
-* **Persistência Automática**: Criação automática de tabelas no banco de dados através do Hibernate.
+## ⚙️ Arquitetura e Domínio
 
-## 🚀 Como Executar o Projeto
+O sistema é focado na gestão de vendas em eventos, possuindo as seguintes entidades principais:
+- **Empresa & Perfil**: Entidades raiz para controle de acesso corporativo.
+- **Usuário**: Operadores do sistema (com senhas criptografadas).
+- **Produto & Evento**: Cadastros base do negócio.
+- **Barraca & EstoqueBarraca**: Controle de pontos de venda dentro de um evento e seus respectivos estoques.
+- **Pedido, ItemPedido & Pagamento**: Fluxo completo de caixa (carrinho de compras, cálculo de subtotais e formas de pagamento).
+
+## 🛠️ Como Executar o Projeto
 
 ### Pré-requisitos
 * JDK 17 instalado.
-* Maven instalado (ou utilizar o wrapper `./mvnw` incluso).
-* Uma IDE (IntelliJ IDEA recomendada).
+* Maven instalado (ou use o `./mvnw` incluso no projeto).
+* PostgreSQL rodando localmente na porta `5432`.
 
-### Passo a Passo
-1.  Clone o repositório:
-    ```bash
-    git clone [https://github.com/seu-usuario/quickstock-backend.git](https://github.com/seu-usuario/quickstock-backend.git)
-    ```
-2.  Importe o projeto na sua IDE como um projeto Maven.
-3.  Aguarde o download das dependências.
-4.  Execute a classe principal: `com.quickstock.backend.BackendApplication`.
-5.  O servidor iniciará na porta **8080**.
-
-## 🔌 Endpoints da API
-
-| Método | Endpoint | Descrição |
-| :--- | :--- | :--- |
-| POST | `/api/companies/register` | Cadastra uma nova empresa |
-| POST | `/api/users/register` | Cadastra um novo empreendedor |
-
-### Exemplo de JSON para Cadastro (POST)
-```json
-{
-  "name": "Exemplo Empresa",
-  "email": "contato@exemplo.com",
-  "password": "senha123",
-  "cnpj": "00.000.000/0001-00",
-  "phone": "8199999999"
-}
+### Configuração do Banco de Dados
+1. Crie um banco de dados no PostgreSQL chamado `quickstock`.
+2. Certifique-se de que o usuário e senha no seu arquivo `application.properties` correspondam ao seu ambiente local:
+   ```properties
+   spring.datasource.url=jdbc:postgresql://localhost:5432/quickstock
+   spring.datasource.username=postgres
+   spring.datasource.password=123456
