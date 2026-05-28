@@ -81,4 +81,4 @@ A API será inicializada e estará pronta para receber requisições HTTP na por
 
 ## 👨‍💻 Autores
 
-Desenvolvido por **Luan Feitosa Santos**  **José Italo S C Dantas**  **Marcelo Vitor Viana da Silva**  **Leticia Viviane Pereira da Silva**.
+Desenvolvido por **Luan Feitosa Santos**,   **José Italo S C Dantas**,   **Marcelo Vitor Viana da Silva**,   **Leticia Viviane Pereira da Silva**.
