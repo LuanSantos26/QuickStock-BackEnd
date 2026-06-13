@@ -1,10 +1,12 @@
 package com.quickstock.backend.controller;
 
+import com.quickstock.backend.dto.LoginResponseDTO;
 import com.quickstock.backend.dto.UsuarioResponseDTO;
 import com.quickstock.backend.entity.Usuario;
 import com.quickstock.backend.repository.EmpresaRepository;
 import com.quickstock.backend.repository.PerfilRepository;
 import com.quickstock.backend.repository.UsuarioRepository;
+import com.quickstock.backend.service.JwtService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -21,6 +23,21 @@ public class UsuarioController {
     @Autowired private UsuarioRepository usuarioRepository;
     @Autowired private PerfilRepository  perfilRepository;
     @Autowired private EmpresaRepository empresaRepository;
+    @Autowired private JwtService jwtService;
+
+    @GetMapping("/me")
+    public ResponseEntity<?> usuarioAtual(
+            @RequestHeader(value = "Authorization", required = false) String authorization) {
+        String token = extractBearerToken(authorization);
+        if (token == null || !jwtService.isTokenValid(token)) {
+            return ResponseEntity.status(401).body(Map.of("erro", "Token inválido ou expirado."));
+        }
+
+        return usuarioRepository.findById(jwtService.getUserId(token))
+                .filter(u -> u.getAtivo() == 1)
+                .<ResponseEntity<?>>map(u -> ResponseEntity.ok(new UsuarioResponseDTO(u)))
+                .orElse(ResponseEntity.status(401).body(Map.of("erro", "Usuário não encontrado.")));
+    }
 
     @GetMapping
     public List<UsuarioResponseDTO> listar() {
@@ -81,7 +98,14 @@ public class UsuarioController {
         return usuarioRepository.findByEmail(email)
                 .filter(u -> u.getAtivo() == 1)
                 .filter(u -> org.springframework.security.crypto.bcrypt.BCrypt.checkpw(senha, u.getSenhaHash()))
-                .map(u -> ResponseEntity.ok((Object) new UsuarioResponseDTO(u)))
+                .map(u -> {
+                    String token = jwtService.generateToken(u);
+                    return ResponseEntity.ok((Object) new LoginResponseDTO(
+                            token,
+                            jwtService.getExpirationMs(),
+                            u
+                    ));
+                })
                 .orElse(ResponseEntity.status(401).body(Map.of("erro", "E-mail ou senha incorretos.")));
     }
 
@@ -115,5 +139,12 @@ public class UsuarioController {
             usuarioRepository.save(u);
         });
         return ResponseEntity.noContent().build();
+    }
+
+    private String extractBearerToken(String authorization) {
+        if (authorization == null || !authorization.startsWith("Bearer ")) {
+            return null;
+        }
+        return authorization.substring(7).trim();
     }
 }

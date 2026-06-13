@@ -10,4 +10,5 @@ import java.util.List;
 public interface EventoRepository extends JpaRepository<Evento, Long> {
     List<Evento> findByEmpresaId(Long empresaId);
     List<Evento> findByEmpresaIdAndStatus(Long empresaId, String status);
+    java.util.Optional<Evento> findFirstByEmpresaIdAndStatusOrderByDataInicioDesc(Long empresaId, String status);
 }

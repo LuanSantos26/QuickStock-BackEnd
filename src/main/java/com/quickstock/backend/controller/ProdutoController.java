@@ -1,66 +1,122 @@
 package com.quickstock.backend.controller;
 
+import com.quickstock.backend.dto.ProdutoRequestDTO;
+import com.quickstock.backend.dto.ProdutoResponseDTO;
+import com.quickstock.backend.entity.Empresa;
 import com.quickstock.backend.entity.Produto;
 import com.quickstock.backend.repository.EmpresaRepository;
 import com.quickstock.backend.repository.ProdutoRepository;
+import com.quickstock.backend.service.ProdutoUploadService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/produtos")
 @CrossOrigin(origins = "*")
 public class ProdutoController {
 
-    @Autowired private ProdutoRepository  repository;
-    @Autowired private EmpresaRepository  empresaRepository;
+    @Autowired private ProdutoRepository repository;
+    @Autowired private EmpresaRepository empresaRepository;
+    @Autowired private ProdutoUploadService uploadService;
 
     @GetMapping
-    public List<Produto> listar(@RequestParam(required = false) Long empresaId) {
-        if (empresaId != null) return repository.findByEmpresaIdAndAtivo(empresaId, 1);
-        return repository.findAll();
+    public List<ProdutoResponseDTO> listar(@RequestParam(required = false) Long empresaId) {
+        if (empresaId != null) {
+            return repository.findByEmpresaIdAndAtivo(empresaId, 1)
+                    .stream()
+                    .map(ProdutoResponseDTO::new)
+                    .toList();
+        }
+        return repository.findAll()
+                .stream()
+                .map(ProdutoResponseDTO::new)
+                .toList();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Produto> buscar(@PathVariable Long id) {
+    public ResponseEntity<ProdutoResponseDTO> buscar(@PathVariable Long id) {
         return repository.findById(id)
-                .map(ResponseEntity::ok)
+                .map(produto -> ResponseEntity.ok(new ProdutoResponseDTO(produto)))
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @PostMapping
-    public ResponseEntity<?> criar(@Valid @RequestBody Produto produto) {
-        if (produto.getEmpresa() == null || produto.getEmpresa().getId() == null) {
-            return ResponseEntity.badRequest().body("empresaId é obrigatório.");
+    @PostMapping("/upload")
+    public ResponseEntity<?> upload(@RequestParam(value = "file", required = false) MultipartFile file) {
+        if (file == null || file.isEmpty()) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("erro", "Arquivo de imagem é obrigatório."));
         }
-        empresaRepository.findById(produto.getEmpresa().getId())
-                .orElseThrow(() -> new RuntimeException("Empresa não encontrada"));
-        return ResponseEntity.status(201).body(repository.save(produto));
+
+        try {
+            String imagemUrl = uploadService.salvarImagem(file);
+            return ResponseEntity.ok(Map.of("imagemUrl", imagemUrl));
+        } catch (IllegalArgumentException ex) {
+            return ResponseEntity.badRequest().body(Map.of("erro", ex.getMessage()));
+        } catch (Exception ex) {
+            return ResponseEntity.internalServerError()
+                    .body(Map.of("erro", "Não foi possível salvar a imagem."));
+        }
+    }
+
+    @PostMapping
+    public ResponseEntity<?> criar(@Valid @RequestBody ProdutoRequestDTO dto) {
+        var empresa = empresaRepository.findById(dto.getEmpresaId());
+        if (empresa.isEmpty()) {
+            return ResponseEntity.badRequest().body(Map.of("erro", "Empresa não encontrada."));
+        }
+
+        Produto produto = mapToEntity(dto, empresa.get());
+        produto.setAtivo(1);
+        Produto salvo = repository.save(produto);
+        return ResponseEntity.status(201).body(new ProdutoResponseDTO(salvo));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Produto> atualizar(@PathVariable Long id,
-                                              @Valid @RequestBody Produto dados) {
-        return repository.findById(id).map(p -> {
-            p.setNome(dados.getNome());
-            p.setPrecoVenda(dados.getPrecoVenda());
-            p.setUnidade(dados.getUnidade());
-            p.setAtivo(dados.getAtivo());
-            return ResponseEntity.ok(repository.save(p));
-        }).orElse(ResponseEntity.notFound().build());
-    }
+    public ResponseEntity<?> atualizar(@PathVariable Long id,
+                                       @Valid @RequestBody ProdutoRequestDTO dto) {
+        var produtoOpt = repository.findById(id);
+        if (produtoOpt.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
 
+        Produto produto = produtoOpt.get();
+        if (!produto.getEmpresa().getId().equals(dto.getEmpresaId())) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("erro", "Produto não pertence à empresa informada."));
+        }
+
+        produto.setNome(dto.getNome());
+        produto.setPrecoVenda(dto.getPrecoVenda());
+        produto.setUnidade(dto.getUnidade());
+        produto.setDescricao(dto.getDescricao());
+        produto.setImagemUrl(dto.getImagemUrl());
+        return ResponseEntity.ok(new ProdutoResponseDTO(repository.save(produto)));
+    }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> desativar(@PathVariable Long id) {
         if (!repository.existsById(id)) return ResponseEntity.notFound().build();
-        repository.findById(id).ifPresent(p -> {
-            p.setAtivo(0);
-            repository.save(p);
+        repository.findById(id).ifPresent(produto -> {
+            produto.setAtivo(0);
+            repository.save(produto);
         });
         return ResponseEntity.noContent().build();
+    }
+
+    private Produto mapToEntity(ProdutoRequestDTO dto, Empresa empresa) {
+        Produto produto = new Produto();
+        produto.setEmpresa(empresa);
+        produto.setNome(dto.getNome());
+        produto.setPrecoVenda(dto.getPrecoVenda());
+        produto.setUnidade(dto.getUnidade());
+        produto.setDescricao(dto.getDescricao());
+        produto.setImagemUrl(dto.getImagemUrl());
+        return produto;
     }
 }

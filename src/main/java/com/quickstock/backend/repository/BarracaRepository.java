@@ -9,4 +9,5 @@ import java.util.List;
 @Repository
 public interface BarracaRepository extends JpaRepository<Barraca, Long> {
     List<Barraca> findByEventoId(Long eventoId);
+    List<Barraca> findByEvento_EmpresaIdAndAtiva(Long empresaId, Integer ativa);
 }

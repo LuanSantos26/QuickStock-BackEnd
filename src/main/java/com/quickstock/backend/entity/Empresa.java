@@ -29,6 +29,21 @@ public class Empresa {
     @Size(max = 20)
     private String telefone;
 
+    @Size(max = 20)
+    @Column(nullable = true)
+    private String tipo = "COMPRADOR";
+
+    @Size(max = 300)
+    private String descricao;
+
+    @Size(max = 500)
+    @Column(name = "logo_url")
+    private String logoUrl;
+
+    @Size(max = 500)
+    @Column(name = "capa_url")
+    private String capaUrl;
+
     @CreationTimestamp
     @Column(name = "criado_em", updatable = false)
     private LocalDateTime criadoEm;

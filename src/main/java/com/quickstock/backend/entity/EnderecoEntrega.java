@@ -1,18 +1,15 @@
 package com.quickstock.backend.entity;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 
-import java.math.BigDecimal;
-
 @Entity
-@Table(name = "produtos")
+@Table(name = "enderecos_entrega")
 @Data
-public class Produto {
+public class EnderecoEntrega {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -24,25 +21,36 @@ public class Produto {
     private Empresa empresa;
 
     @NotBlank
-    @Size(max = 150)
-    private String nome;
+    @Size(max = 80)
+    private String apelido;
 
-    @NotNull
-    @DecimalMin("0.0")
-    @Column(name = "preco_venda", nullable = false, precision = 10, scale = 2)
-    private BigDecimal precoVenda;
+    @NotBlank
+    @Size(max = 150)
+    private String logradouro;
 
     @NotBlank
     @Size(max = 20)
-    private String unidade;
+    private String numero;
 
-    @Size(max = 500)
-    private String descricao;
+    @Size(max = 80)
+    private String complemento;
 
-    @Size(max = 500)
-    @Column(name = "imagem_url")
-    private String imagemUrl;
+    @NotBlank
+    @Size(max = 80)
+    private String bairro;
+
+    @NotBlank
+    @Size(max = 80)
+    private String cidade;
+
+    @NotBlank
+    @Size(max = 2)
+    private String uf;
+
+    @NotBlank
+    @Size(max = 9)
+    private String cep;
 
     @Column(nullable = false)
-    private Integer ativo = 1;
+    private boolean principal = false;
 }
