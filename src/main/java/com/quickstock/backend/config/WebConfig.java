@@ -17,7 +17,8 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addCorsMappings(CorsRegistry registry) {
-        registry.addMapping("/api/**")
+
+        registry.addMapping("/**")
                 .allowedOriginPatterns("*")
                 .allowedMethods("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
                 .allowedHeaders("*")
@@ -26,16 +27,20 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
+
         Path produtosDir = Paths.get(uploadDir).toAbsolutePath().normalize();
         Path uploadsRoot = produtosDir.getParent();
-        if (uploadsRoot == null) {
-            return;
+        if (uploadsRoot != null) {
+            String fileLocation = "file:" + uploadsRoot.toString().replace('\\', '/') + "/";
+            registry.addResourceHandler("/uploads/**")
+                    .addResourceLocations(fileLocation, "classpath:/static/uploads/")
+                    .setCachePeriod(3600);
         }
 
-        String fileLocation = "file:" + uploadsRoot.toString().replace('\\', '/') + "/";
-
-        registry.addResourceHandler("/uploads/**")
-                .addResourceLocations(fileLocation, "classpath:/static/uploads/")
-                .setCachePeriod(3600);
+        // Configuração  para mapear os arquivos do Swagger
+        registry.addResourceHandler("/swagger-ui/**")
+                .addResourceLocations("classpath:/META-INF/resources/webjars/swagger-ui/");
+        registry.addResourceHandler("/v3/api-docs/**")
+                .addResourceLocations("classpath:/META-INF/resources/");
     }
 }
