@@ -1,112 +1,290 @@
-📦 QuickStock - Back-end
-O QuickStock Back-end é uma API RESTful desenvolvida em Java com Spring Boot. Este sistema fornece toda a infraestrutura necessária para a gestão de inventário, controlo de vendas, gestão de eventos (com alocação de barracas), processamento financeiro e autenticação de utilizadores.
+# 🚀 QuickStock API
 
-🚀 Tecnologias Utilizadas
-O projeto foi construído utilizando as seguintes tecnologias e bibliotecas:
+Backend do sistema **QuickStock**, uma plataforma completa para gerenciamento de estoque, vendas, eventos e controle financeiro.
 
-Java 17 - Linguagem principal.
+A API foi desenvolvida utilizando **Java 17**, **Spring Boot** e **PostgreSQL**, seguindo uma arquitetura escalável baseada em camadas, preparada para futuras expansões e integração com aplicações web, mobile e sistemas de terceiros.
 
-Spring Boot 3.4.0 - Framework base para a aplicação web.
+---
 
-Spring Data JPA / Hibernate - Mapeamento objeto-relacional (ORM) e persistência de dados.
+## 📖 Sobre o Projeto
 
-PostgreSQL - Base de dados relacional principal.
+O QuickStock foi criado para centralizar a gestão operacional de empresas que necessitam controlar:
 
-Lombok - Redução de código repetitivo (Getters, Setters, Construtores).
+* Estoque de produtos
+* Vendas e pedidos
+* Clientes e fornecedores
+* Eventos e barracas
+* Fluxo financeiro
+* Upload de arquivos e imagens
+* Controle de acesso por perfil de usuário
 
-JJWT (JSON Web Token) - Autenticação e autorização seguras (implementação customizada sem bloqueios estritos do Spring Security).
+O sistema foi projetado para ser modular, permitindo a inclusão de novos recursos sem impactar a estrutura principal da aplicação.
 
-Springdoc OpenAPI (Swagger) - Documentação automática e interativa da API.
+---
 
-Maven - Gestão de dependências e automação de build.
+## 🛠️ Tecnologias Utilizadas
 
-⚙️ Funcionalidades Principais
-Gestão de Utilizadores e Perfis: Registo, login com JWT e controlo de acessos (Administradores, Vendedores, etc.).
+### Backend
 
-Gestão de Stock e Produtos: Criação de produtos, controlo de quantidades, catálogos e gestão de múltiplos fornecedores/marketplaces.
+* Java 17
+* Spring Boot 3.4
+* Spring Data JPA
+* Hibernate ORM
+* Maven
+* Lombok
 
-Gestão de Eventos e Barracas: Organização de eventos, alocação de stock físico para barracas específicas e acompanhamento de vendas em tempo real.
+### Banco de Dados
 
-Processamento de Pedidos: Carrinho de compras, histórico de pedidos e alteração de estados de envio/entrega.
+* PostgreSQL
 
-Módulo Financeiro: Registo de pagamentos, gestão de cartões/formas de pagamento guardadas e visualização de resumos financeiros mensais (lucros, valores e pedidos).
+### Segurança
 
-Upload de Ficheiros: Sistema integrado para upload e fornecimento estático de imagens de produtos e logótipos de empresas.
+* JWT (JSON Web Token)
 
-📋 Pré-requisitos
-Para executar este projeto localmente, precisará de ter instalado no seu ambiente:
+### Documentação
 
-Java Development Kit (JDK) 17 ou superior.
+* Swagger / OpenAPI 3
+* SpringDoc OpenAPI
 
-Apache Maven (opcional, o projeto inclui o Maven Wrapper mvnw).
+---
 
-PostgreSQL (em execução na porta 5432).
+## ✨ Principais Funcionalidades
 
-🛠️ Configuração do Ambiente
-Clone o repositório:
+### 👥 Gestão de Usuários
 
-Bash
+* Cadastro de usuários
+* Login com autenticação JWT
+* Controle de permissões
+* Perfis de acesso
+
+### 📦 Gestão de Estoque
+
+* Cadastro de produtos
+* Controle de quantidade
+* Atualização automática de estoque
+* Gestão de fornecedores
+
+### 🛒 Gestão de Vendas
+
+* Registro de pedidos
+* Histórico de vendas
+* Controle de status
+* Integração com estoque
+
+### 🎪 Gestão de Eventos
+
+* Cadastro de eventos
+* Organização de barracas
+* Distribuição de estoque por evento
+* Monitoramento de vendas em tempo real
+
+### 💰 Módulo Financeiro
+
+* Registro de pagamentos
+* Controle de receitas
+* Relatórios financeiros
+* Resumo mensal de faturamento
+
+### 🖼️ Upload de Arquivos
+
+* Upload de imagens de produtos
+* Upload de logotipos
+* Armazenamento local configurável
+
+---
+
+## 🏗️ Arquitetura do Projeto
+
+A aplicação segue o padrão de arquitetura em camadas:
+
+```text
+src/main/java/com/quickstock
+│
+├── config
+├── controller
+├── dto
+├── entity
+├── exception
+├── repository
+├── security
+├── service
+└── util
+```
+
+### Descrição das Camadas
+
+| Camada     | Responsabilidade           |
+| ---------- | -------------------------- |
+| controller | Endpoints REST             |
+| service    | Regras de negócio          |
+| repository | Acesso ao banco            |
+| entity     | Modelos persistidos        |
+| dto        | Objetos de transferência   |
+| config     | Configurações globais      |
+| exception  | Tratamento de erros        |
+| security   | Autenticação e autorização |
+
+---
+
+## 📋 Pré-requisitos
+
+Antes de executar o projeto, certifique-se de possuir:
+
+* Java 17+
+* PostgreSQL 14+
+* Maven 3.9+
+* Git
+
+---
+
+## ⚙️ Configuração Local
+
+### 1. Clonar o repositório
+
+```bash
 git clone https://github.com/luansantos26/quickstock-backend.git
-cd quickstock-backend
-Configure a Base de Dados:
-Abra o ficheiro src/main/resources/application.properties e ajuste as credenciais do PostgreSQL, caso sejam diferentes do padrão:
 
-Properties
+cd quickstock-backend
+```
+
+### 2. Criar o banco de dados
+
+```sql
+CREATE DATABASE quickstock;
+```
+
+### 3. Configurar o application.properties
+
+```properties
 spring.datasource.url=jdbc:postgresql://localhost:5432/quickstock
 spring.datasource.username=postgres
-spring.datasource.password=admin # Altere para a sua palavra-passe
-Configuração de Diretórios de Imagens:
-O projeto guarda e serve imagens localmente. Certifique-se de que a aplicação tem permissões de escrita na diretoria definida em upload.dir no ficheiro application.properties (por defeito: uploads/produtos).
+spring.datasource.password=sua_senha
 
-▶️ Execução do Projeto
-Pode executar a aplicação diretamente através do terminal utilizando o Maven Wrapper incluído no projeto:
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.show-sql=true
+```
 
-Em Windows:
+---
 
-DOS
+## ▶️ Executando a Aplicação
+
+### Windows
+
+```bash
 mvnw.cmd spring-boot:run
-Em Linux/macOS:
+```
 
-Bash
+### Linux / macOS
+
+```bash
 ./mvnw spring-boot:run
-A API ficará disponível no endereço: http://localhost:8080.
+```
 
-(Nota: Na primeira execução, o Hibernate irá criar automaticamente as tabelas na base de dados, e os ficheiros SeedRunner irão popular os dados iniciais necessários, como formas de pagamento e endereços padrão).
+A aplicação ficará disponível em:
 
-📚 Documentação da API (Swagger)
-A API está totalmente documentada através do Swagger/OpenAPI. Uma vez que o servidor esteja em execução, pode aceder à interface gráfica interativa para explorar e testar os endpoints.
+```text
+http://localhost:8080
+```
 
-Interface Gráfica (Atalho configurado): http://localhost:8080/swagger
+---
 
-Interface Gráfica (Caminho completo): http://localhost:8080/swagger-ui/index.html
+## 📚 Documentação da API
 
-Especificação JSON (OpenAPI 3): http://localhost:8080/v3/api-docs
+Após iniciar a aplicação:
 
-📁 Estrutura do Código-Fonte
-O projeto segue a arquitetura em camadas padrão do Spring Boot:
+### Swagger UI
 
-config/: Classes de configuração global (CORS, mapeamento de recursos estáticos do WebConfig, Seeds de base de dados).
+```text
+http://localhost:8080/swagger
+```
 
-controller/: Endpoints REST que recebem as requisições HTTP e devolvem as respostas.
+ou
 
-dto/: Data Transfer Objects utilizados para mapear dados de entrada (Request) e saída (Response), mantendo as entidades protegidas.
+```text
+http://localhost:8080/swagger-ui/index.html
+```
 
-entity/: Modelos de domínio que representam as tabelas na base de dados PostgreSQL.
+### OpenAPI JSON
 
-exception/: Tratamento global de erros e exceções customizadas (GlobalExceptionHandler).
+```text
+http://localhost:8080/v3/api-docs
+```
 
-repository/: Interfaces do Spring Data JPA para comunicação direta com a base de dados.
+---
 
-service/: Camada de regras de negócio, processamento de lógica e validações estruturais.
+## 🔒 Segurança
 
-🔒 Segurança (JWT)
-Este projeto utiliza JSON Web Tokens (JWT) para garantir que as operações sensíveis são feitas de forma segura.
-A chave secreta e o tempo de expiração do token podem ser ajustados no ficheiro application.properties:
+A autenticação utiliza JWT (JSON Web Token).
 
-Properties
-jwt.secret=SuaChaveSecretaSuperSeguraAqui
-jwt.expiration-ms=86400000 # Duração em milissegundos (ex: 24 horas)
-A segurança das rotas (validação de tokens) é gerida manualmente nos serviços/controladores relevantes, proporcionando flexibilidade na documentação e no acesso público a rotas específicas.
+Configuração padrão:
 
-👨‍💻 Autores
-Desenvolvido por Luan Feitosa Santos, José Italo S C Dantas, Marcelo Vitor Viana da Silva, Leticia Viviane Pereira da Silva.
+```properties
+jwt.secret=SUA_CHAVE_SECRETA
+jwt.expiration-ms=86400000
+```
+
+### Fluxo de autenticação
+
+1. Usuário realiza login
+2. API gera token JWT
+3. Cliente envia token no header Authorization
+4. API valida o token e autoriza o acesso
+
+---
+
+## 📈 Roadmap
+
+Funcionalidades planejadas para futuras versões:
+
+* Dashboard analítico avançado
+* Relatórios em PDF
+* Integração com PIX
+* Integração com Mercado Pago
+* Controle de múltiplas filiais
+* Sistema de notificações
+* Auditoria de operações
+* Logs centralizados
+* Deploy em Docker
+* Integração CI/CD
+
+---
+
+## 🤝 Contribuição
+
+Contribuições são bem-vindas.
+
+1. Faça um fork do projeto
+2. Crie uma branch para sua feature
+
+```bash
+git checkout -b feature/minha-feature
+```
+
+3. Commit suas alterações
+
+```bash
+git commit -m "feat: adiciona nova funcionalidade"
+```
+
+4. Envie para seu fork
+
+```bash
+git push origin feature/minha-feature
+```
+
+5. Abra um Pull Request
+
+---
+
+## 👨‍💻 Equipe
+
+* Luan Feitosa Santos
+* José Ítalo S. C. Dantas
+* Marcelo Vitor Viana da Silva
+* Leticia Viviane Pereira da Silva
+
+---
+
+## 📄 Licença
+
+Este projeto é destinado a fins acadêmicos e de aprendizado, podendo ser expandido para utilização comercial mediante adequações futuras.
