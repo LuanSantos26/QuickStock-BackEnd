@@ -15,7 +15,7 @@ import java.util.List;
 @Service
 public class MarketplaceService {
 
-    private static final List<String> TIPOS_FORNECEDOR = List.of("DISTRIBUIDOR", "PLATAFORMA");
+    private static final List<String> TIPOS_FORNECEDOR = List.of("DISTRIBUIDOR");
 
     @Autowired private EmpresaRepository empresaRepository;
     @Autowired private ProdutoRepository produtoRepository;
@@ -31,7 +31,7 @@ public class MarketplaceService {
         Empresa fornecedor = empresaRepository.findById(fornecedorId)
                 .orElseThrow(() -> new CadastroException(HttpStatus.NOT_FOUND, "Fornecedor não encontrado."));
 
-        if (!TIPOS_FORNECEDOR.contains(fornecedor.getTipo())) {
+        if (!"DISTRIBUIDOR".equals(fornecedor.getTipo())) {
             throw new CadastroException(HttpStatus.BAD_REQUEST, "Empresa informada não é fornecedora.");
         }
 

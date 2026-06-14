@@ -8,7 +8,6 @@ import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.core.annotation.Order;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
@@ -16,7 +15,11 @@ import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.util.List;
 
-@Component
+/**
+ * Seed financeiro desativado — dados demo não são mais criados automaticamente.
+ * Solicitações com observacao SEED_FINANCEIRO_DEMO são ignoradas pelo FinanceiroService.
+ */
+// @Component
 @Order(100)
 public class FinanceiroSeedRunner implements ApplicationRunner {
 

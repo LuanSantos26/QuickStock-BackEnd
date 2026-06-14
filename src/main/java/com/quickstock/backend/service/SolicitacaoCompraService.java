@@ -24,6 +24,7 @@ public class SolicitacaoCompraService {
     private static final List<String> TIPOS_FORNECEDOR = List.of("DISTRIBUIDOR", "PLATAFORMA");
     private static final List<String> METODOS_PAGAMENTO = List.of("pix", "credito", "debito", "dinheiro");
     private static final long SEGUNDOS_PARA_ROTA = 20L;
+    private static final long SEGUNDOS_PARA_ENTREGA = 55L;
 
     @Autowired private SolicitacaoCompraRepository solicitacaoRepository;
     @Autowired private ItemSolicitacaoCompraRepository itemRepository;
@@ -124,6 +125,18 @@ public class SolicitacaoCompraService {
                 throw new CadastroException(HttpStatus.BAD_REQUEST, "Produto não pertence ao fornecedor selecionado.");
             }
 
+            BigDecimal estoqueAtual = produto.getEstoque() != null ? produto.getEstoque() : BigDecimal.ZERO;
+            if (estoqueAtual.compareTo(itemDto.getQuantidade()) < 0) {
+                throw new CadastroException(
+                        HttpStatus.BAD_REQUEST,
+                        "Estoque insuficiente para \"" + produto.getNome() + "\". Disponível: "
+                                + estoqueAtual.stripTrailingZeros().toPlainString()
+                );
+            }
+
+            produto.setEstoque(estoqueAtual.subtract(itemDto.getQuantidade()));
+            produtoRepository.save(produto);
+
             BigDecimal subtotal = produto.getPrecoVenda().multiply(itemDto.getQuantidade());
 
             ItemSolicitacaoCompra item = new ItemSolicitacaoCompra();
@@ -154,18 +167,52 @@ public class SolicitacaoCompraService {
             return solicitacaoRepository.save(solicitacao);
         }
 
+        if ("em_rota".equals(status) && segundos >= SEGUNDOS_PARA_ENTREGA) {
+            solicitacao.setStatus("entregue");
+            return solicitacaoRepository.save(solicitacao);
+        }
+
         return solicitacao;
     }
 
     private SolicitacaoCompraResponseDTO toResponse(SolicitacaoCompra solicitacao) {
         List<ItemSolicitacaoCompra> itens = itemRepository.findBySolicitacaoId(solicitacao.getId());
         String status = solicitacao.getStatus() != null ? solicitacao.getStatus() : "aguardando_liberacao";
+        int previsaoMinutos = calcularPrevisaoMinutos(status, solicitacao.getCriadoEm());
         return new SolicitacaoCompraResponseDTO(
                 solicitacao,
                 itens,
                 labelStatus(status),
-                montarEtapas(status)
+                montarEtapas(status),
+                previsaoMinutos,
+                formatarPrevisaoEntrega(status, previsaoMinutos)
         );
+    }
+
+    private int calcularPrevisaoMinutos(String status, LocalDateTime criadoEm) {
+        if ("entregue".equals(status) || "cancelada".equals(status)) {
+            return 0;
+        }
+        if ("em_rota".equals(status)) {
+            return 12 + (criadoEm != null ? (int) (criadoEm.getMinute() % 13) : 5);
+        }
+        if (criadoEm == null) {
+            return 50;
+        }
+        long minutosDecorridos = Duration.between(criadoEm, LocalDateTime.now()).toMinutes();
+        return (int) Math.max(20, 55 - minutosDecorridos);
+    }
+
+    private String formatarPrevisaoEntrega(String status, int minutos) {
+        return switch (status) {
+            case "entregue" -> "Pedido entregue";
+            case "cancelada" -> "Pedido cancelado";
+            case "em_rota" -> "Chegada em até " + minutos + " min";
+            default -> {
+                int max = minutos + 15;
+                yield "Previsão de entrega: " + minutos + "–" + max + " min";
+            }
+        };
     }
 
     private String labelStatus(String status) {
@@ -179,35 +226,28 @@ public class SolicitacaoCompraService {
     }
 
     private List<StatusPedidoDTO> montarEtapas(String status) {
-        int indiceAtual = switch (status) {
+        record EtapaDef(String codigo, String label) {}
+        List<EtapaDef> defs = List.of(
+                new EtapaDef("pedido_efetuado", "Pedido confirmado"),
+                new EtapaDef("aguardando_liberacao", "Preparando pedido"),
+                new EtapaDef("em_rota", "Saiu para entrega"),
+                new EtapaDef("entregue", "Pedido entregue")
+        );
+
+        int indiceAtivo = switch (status) {
             case "aguardando_liberacao" -> 1;
             case "em_rota" -> 2;
-            case "entregue" -> 3;
+            case "entregue" -> -1;
             default -> 1;
         };
 
         List<StatusPedidoDTO> etapas = new ArrayList<>();
-        etapas.add(new StatusPedidoDTO(
-                "pedido_efetuado",
-                "Pedido efetuado com sucesso",
-                1,
-                true,
-                indiceAtual == 0
-        ));
-        etapas.add(new StatusPedidoDTO(
-                "aguardando_liberacao",
-                "Aguardando liberação da distribuidora",
-                2,
-                indiceAtual >= 2,
-                indiceAtual == 1
-        ));
-        etapas.add(new StatusPedidoDTO(
-                "em_rota",
-                "Saindo para rota de entrega",
-                3,
-                indiceAtual >= 3,
-                indiceAtual == 2
-        ));
+        for (int i = 0; i < defs.size(); i++) {
+            EtapaDef def = defs.get(i);
+            boolean concluida = indiceAtivo == -1 || i < indiceAtivo;
+            boolean ativa = i == indiceAtivo;
+            etapas.add(new StatusPedidoDTO(def.codigo(), def.label(), i + 1, concluida, ativa));
+        }
         return etapas;
     }
 }

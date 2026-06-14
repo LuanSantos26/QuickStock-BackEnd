@@ -45,4 +45,8 @@ public class Produto {
 
     @Column(nullable = false)
     private Integer ativo = 1;
+
+    @DecimalMin("0.0")
+    @Column(precision = 10, scale = 3)
+    private BigDecimal estoque;
 }

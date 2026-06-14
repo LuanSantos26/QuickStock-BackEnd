@@ -16,6 +16,7 @@ public class ProdutoResponseDTO {
     private final String descricao;
     private final String imagemUrl;
     private final Integer ativo;
+    private final BigDecimal estoque;
 
     public ProdutoResponseDTO(Produto produto) {
         this.id = produto.getId();
@@ -26,5 +27,6 @@ public class ProdutoResponseDTO {
         this.descricao = produto.getDescricao();
         this.imagemUrl = produto.getImagemUrl();
         this.ativo = produto.getAtivo();
+        this.estoque = produto.getEstoque() != null ? produto.getEstoque() : BigDecimal.ZERO;
     }
 }

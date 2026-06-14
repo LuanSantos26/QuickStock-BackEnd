@@ -13,16 +13,16 @@ import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.Optional;
 
 @Component
 @Order(Ordered.LOWEST_PRECEDENCE)
 public class MarketplaceDataFixRunner implements ApplicationRunner {
 
     private static final Logger log = LoggerFactory.getLogger(MarketplaceDataFixRunner.class);
-    private static final List<String> TIPOS_FORNECEDOR = List.of("DISTRIBUIDOR", "PLATAFORMA");
 
     private final EmpresaRepository empresaRepository;
     private final ProdutoRepository produtoRepository;
@@ -36,171 +36,138 @@ public class MarketplaceDataFixRunner implements ApplicationRunner {
 
     private record EmpresaFix(String nome, String descricao, String logoUrl, String capaUrl) {}
 
-    private record ProdutoFix(String nome, String descricao, String imagemUrl) {}
+    private record ProdutoFix(String nome, BigDecimal preco, String descricao, String imagemUrl, int estoqueInicial) {}
 
-    /** Logos via ui-avatars e capas via picsum — URLs estáveis (Unsplash antigo retorna 404). */
-    private static String logo(String initials) {
+    private static String logo(String initials, String bg) {
         return "https://ui-avatars.com/api/?name=" + initials
-                + "&background=F8B125&color=fff&bold=true&size=200&format=png";
+                + "&background=" + bg + "&color=fff&bold=true&size=200&format=png";
     }
 
     private static String capa(String seed) {
         return "https://picsum.photos/seed/" + seed + "/800/400";
     }
 
-    private static final Map<String, EmpresaFix> EMPRESAS = Map.ofEntries(
-            Map.entry("11.111.111/0001-11", new EmpresaFix(
-                    "QuickStock Distribuidora",
-                    "Distribuidora oficial QuickStock. Cervejas, refrigerantes e \u00e1guas para revenda em todo o Nordeste.",
-                    logo("QS"),
-                    capa("quickstock-capa"))),
-            Map.entry("22.222.222/0001-22", new EmpresaFix(
-                    "Tonio Distribuidora",
-                    "Atacado de bebidas em Caruaru. Cervejas nacionais e geladas para bares, quiosques e eventos.",
-                    logo("TD"),
-                    capa("tonio-capa"))),
-            Map.entry("33.333.333/0001-33", new EmpresaFix(
-                    "Nordeste Bebidas Atacado",
-                    "Atacado de cervejas, refrigerantes e energ\u00e9ticos para revenda no Nordeste.",
-                    logo("NB"),
-                    capa("nordeste-capa"))),
-            Map.entry("44.444.444/0001-44", new EmpresaFix(
-                    "Imperial Cervejas PE",
-                    "Distribuidora premium de cervejas importadas e nacionais em Pernambuco.",
-                    logo("IP"),
-                    capa("imperial-capa"))),
-            Map.entry("55.555.555/0001-55", new EmpresaFix(
-                    "Gelada Express Caruaru",
-                    "Entrega r\u00e1pida de bebidas geladas para bares, quiosques e festas em Caruaru.",
-                    logo("GE"),
-                    capa("gelada-capa"))),
-            Map.entry("66.666.666/0001-66", new EmpresaFix(
-                    "Refri & Cia Distribuidora",
-                    "Refrigerantes, sucos e \u00e1guas para revenda em grande volume.",
-                    logo("RC"),
-                    capa("refri-capa"))),
-            Map.entry("77.777.777/0001-77", new EmpresaFix(
-                    "Festa Drinks Atacado",
-                    "Bebidas para festas juninas, eventos e feiras de Caruaru.",
-                    logo("FD"),
-                    capa("festa-capa"))),
-            Map.entry("88.888.888/0001-88", new EmpresaFix(
-                    "Porto Breja Distribuidora",
-                    "Especialista em cervejas craft e chopes para bares e restaurantes.",
-                    logo("PB"),
-                    capa("porto-capa"))),
-            Map.entry("99.999.999/0001-99", new EmpresaFix(
-                    "\u00c1gua & G\u00e1s Nordeste",
-                    "\u00c1guas minerais, g\u00e1s de cozinha e bebidas n\u00e3o alco\u00f3licas para revenda.",
-                    logo("AG"),
-                    capa("agua-capa"))),
-            Map.entry("10.101.010/0001-10", new EmpresaFix(
-                    "Bira Premium Atacado",
-                    "Cervejas premium, long necks e packs para atacado e revenda.",
-                    logo("BP"),
-                    capa("bira-capa"))),
-            Map.entry("20.202.020/0001-20", new EmpresaFix(
-                    "S\u00e3o Jo\u00e3o Bebidas",
-                    "Fornecedor tradicional de bebidas para festas de S\u00e3o Jo\u00e3o e eventos sazonais.",
-                    logo("SJ"),
-                    capa("saojoao-capa")))
+    private static String img(String seed) {
+        return "https://picsum.photos/seed/" + seed + "/400/400";
+    }
+
+    private static final Map<String, EmpresaFix> EMPRESAS = Map.of(
+            "30.001.001/0001-01", new EmpresaFix(
+                    "Casa dos Vinhos",
+                    "Vinhos nacionais e importados selecionados para bares, restaurantes e revenda.",
+                    logo("CV", "722F37"),
+                    capa("casa-dos-vinhos")),
+            "30.002.002/0001-02", new EmpresaFix(
+                    "Cervejaria Caruaru",
+                    "Cervejas geladas e importadas para revenda em Caruaru e região.",
+                    logo("CC", "F8B125"),
+                    capa("cervejaria-caruaru")),
+            "30.003.003/0001-03", new EmpresaFix(
+                    "Whisky Labs",
+                    "Whiskies, conhaques e destilados premium para colecionadores e revenda.",
+                    logo("WL", "1a365d"),
+                    capa("whisky-labs"))
     );
 
-    private static final List<ProdutoFix> PRODUTOS = List.of(
-            new ProdutoFix("Skol Lata 350ml",
-                    "Cerveja Skol Pilsen em lata de 350 ml. Ideal para revenda em quiosques e bares.",
-                    "https://images.unsplash.com/photo-1618180034764-13277f148d92?w=400&h=400&fit=crop&bg=ffffff"),
-            new ProdutoFix("Brahma 600ml",
-                    "Cerveja Brahma long neck 600 ml. Bebida gelada para pontos de venda.",
-                    "https://images.unsplash.com/photo-1523367868498-57a314dc45a5?w=400&h=400&fit=crop&bg=ffffff"),
-            new ProdutoFix("Heineken Long Neck",
-                    "Cerveja Heineken long neck 330 ml. Linha premium para bares e restaurantes.",
-                    "https://images.unsplash.com/photo-1618885472179-5e4740f0882c?w=400&h=400&fit=crop&bg=ffffff"),
-            new ProdutoFix("Stella Artois 330ml",
-                    "Cerveja Stella Artois long neck 330 ml. Importada, ideal para revenda premium.",
-                    "https://images.unsplash.com/photo-1535958636474-b021ee887b13?w=400&h=400&fit=crop&bg=ffffff"),
-            new ProdutoFix("Corona Extra 330ml",
-                    "Cerveja Corona Extra long neck 330 ml. Refrescante para revenda em eventos.",
-                    "https://images.unsplash.com/photo-1603847709497-37f1370d1c68?w=400&h=400&fit=crop&bg=ffffff"),
-            new ProdutoFix("Antarctica Original 600ml",
-                    "Cerveja Antarctica Original long neck 600 ml. Sabor tradicional para revenda.",
-                    "https://images.unsplash.com/photo-1523367868498-57a314dc45a5?w=400&h=400&fit=crop&bg=ffffff"),
-            new ProdutoFix("Coca-Cola 2L",
-                    "Refrigerante Coca-Cola pet 2 litros. Produto de alta rotatividade para revenda.",
-                    "https://images.unsplash.com/photo-1556679343-c7306c1976bc?w=400&h=400&fit=crop&bg=ffffff"),
-            new ProdutoFix("Guaran\u00e1 Antarctica 2L",
-                    "Refrigerante Guaran\u00e1 Antarctica pet 2 litros. Sabor guaran\u00e1 para revenda.",
-                    "https://images.unsplash.com/photo-1625777453046-048aedc1e009?w=400&h=400&fit=crop&bg=ffffff"),
-            new ProdutoFix("Fanta Laranja 2L",
-                    "Refrigerante Fanta Laranja pet 2 litros. Sabor laranja para revenda.",
-                    "https://images.unsplash.com/photo-1629203851122-3726ecdf080e?w=400&h=400&fit=crop&bg=ffffff"),
-            new ProdutoFix("\u00c1gua Crystal 5L",
-                    "\u00c1gua mineral Crystal sem g\u00e1s, gal\u00e3o de 5 litros. Essencial para revenda.",
-                    "https://images.unsplash.com/photo-1563636619777-756a77877439?w=400&h=400&fit=crop&bg=ffffff"),
-            new ProdutoFix("\u00c1gua Crystal 1,5L",
-                    "\u00c1gua mineral Crystal sem g\u00e1s, garrafa de 1,5 litros.",
-                    "https://images.unsplash.com/photo-1548839140-29a749e1cf4d?w=400&h=400&fit=crop&bg=ffffff"),
-            new ProdutoFix("Red Bull 250ml",
-                    "Energ\u00e9tico Red Bull lata 250 ml. Alta demanda em bares e eventos.",
-                    "https://images.unsplash.com/photo-1622543925917-763c38e03a39?w=400&h=400&fit=crop&bg=ffffff"),
-            new ProdutoFix("Suco Del Valle 1L",
-                    "Suco Del Valle sabor laranja, caixa de 1 litro. Op\u00e7\u00e3o n\u00e3o alco\u00f3lica para revenda.",
-                    "https://images.unsplash.com/photo-1622483767028-3f66f32aef97?w=400&h=400&fit=crop&bg=ffffff")
+    private static final Map<String, List<ProdutoFix>> PRODUTOS_POR_CNPJ = Map.of(
+            "30.001.001/0001-01", List.of(
+                    new ProdutoFix("Vinho Mazzei Zisola Sicilia Noto Rosso 750ml", bd("156.00"),
+                            "Vinho tinto siciliano Noto Rosso, garrafa 750 ml.", img("vinho-mazzei"), 150),
+                    new ProdutoFix("Vinho Louis Latour Bourgogne Chardonnay 750 ml", bd("200.00"),
+                            "Vinho branco Bourgogne Chardonnay, garrafa 750 ml.", img("vinho-latour"), 100),
+                    new ProdutoFix("Vinho Naturelle Tinto Reserva 750 ML", bd("60.00"),
+                            "Vinho tinto reserva Naturelle, garrafa 750 ml.", img("vinho-naturelle"), 300),
+                    new ProdutoFix("Vinho Carmin De Peumo Carmenere 750 ml", bd("666.00"),
+                            "Vinho tinto Carmenere Carmin De Peumo, garrafa 750 ml.", img("vinho-carmin"), 80),
+                    new ProdutoFix("Vinho Carolina Reserva Sauvignon Blanc 750 ml", bd("60.00"),
+                            "Vinho branco Sauvignon Blanc reserva Carolina, garrafa 750 ml.", img("vinho-carolina"), 200)
+            ),
+            "30.002.002/0001-02", List.of(
+                    new ProdutoFix("Cerveja Heineken Long Neck 330ml", bd("5.99"),
+                            "Cerveja Heineken long neck 330 ml.", img("cerveja-heineken"), 200),
+                    new ProdutoFix("Cerveja Corona Long Neck", bd("6.99"),
+                            "Cerveja Corona Extra long neck 330 ml.", img("cerveja-corona"), 150),
+                    new ProdutoFix("Cerveja Amstel Lata 269ml", bd("3.19"),
+                            "Cerveja Amstel lata 269 ml.", img("cerveja-amstel"), 300),
+                    new ProdutoFix("Cerveja Cerpa Export Long Neck 350ml", bd("8.39"),
+                            "Cerveja Cerpa Export long neck 350 ml.", img("cerveja-cerpa"), 100),
+                    new ProdutoFix("Cerveja Paulaner Munchen Weissbier 500ml", bd("11.19"),
+                            "Cerveja Paulaner Munchen Weissbier garrafa 500 ml.", img("cerveja-paulaner"), 80)
+            ),
+            "30.003.003/0001-03", List.of(
+                    new ProdutoFix("Whisky Escocês Royal Salute 21 Anos The Signature Blend 700ml", bd("989.00"),
+                            "Whisky escocês Royal Salute 21 anos, garrafa 700 ml.", img("whisky-royal-salute"), 150),
+                    new ProdutoFix("Whisky The Balvenie PortWood 21 Anos 700ml Single Malt Escocês", bd("2795.30"),
+                            "Whisky single malt The Balvenie PortWood 21 anos, garrafa 700 ml.", img("whisky-balvenie"), 100),
+                    new ProdutoFix("Whisky Glenfiddich Single Malt 12 Anos 750ml Escocês", bd("415.75"),
+                            "Whisky single malt Glenfiddich 12 anos, garrafa 750 ml.", img("whisky-glenfiddich"), 300),
+                    new ProdutoFix("Conhaque Martell L'Or de Jean Martell 700ml", bd("18711.00"),
+                            "Conhaque Martell L'Or de Jean Martell, garrafa 700 ml.", img("conhaque-martell"), 80),
+                    new ProdutoFix("Whisky Suntory Hibiki Japanese Harmony 700ml | Blended Premium Japonês", bd("729.90"),
+                            "Whisky japonês Suntory Hibiki Japanese Harmony, garrafa 700 ml.", img("whisky-hibiki"), 200)
+            )
     );
 
     @Override
     @Transactional
     public void run(ApplicationArguments args) {
         int empresasAtualizadas = 0;
-        Set<Long> idsAtualizados = new java.util.HashSet<>();
+        int produtosAtualizados = 0;
 
         for (Map.Entry<String, EmpresaFix> entry : EMPRESAS.entrySet()) {
-            var empresaOpt = empresaRepository.findByCnpj(entry.getKey());
-            if (empresaOpt.isPresent()) {
-                aplicarFixEmpresa(empresaOpt.get(), entry.getValue());
-                idsAtualizados.add(empresaOpt.get().getId());
-                empresasAtualizadas++;
-            } else {
+            Optional<Empresa> empresaOpt = empresaRepository.findByCnpj(entry.getKey());
+            if (empresaOpt.isEmpty()) {
                 log.warn("Marketplace seed: CNPJ {} não encontrado no banco.", entry.getKey());
+                continue;
+            }
+
+            Empresa empresa = empresaOpt.get();
+            aplicarFixEmpresa(empresa, entry.getValue());
+            empresa.setTipo("DISTRIBUIDOR");
+            empresaRepository.save(empresa);
+            empresasAtualizadas++;
+
+            List<ProdutoFix> produtos = PRODUTOS_POR_CNPJ.getOrDefault(entry.getKey(), List.of());
+            for (ProdutoFix fix : produtos) {
+                produtosAtualizados += sincronizarProduto(empresa, fix);
             }
         }
 
-        for (Empresa empresa : empresaRepository.findAll()) {
-            String tipo = empresa.getTipo();
-            if (tipo == null || !TIPOS_FORNECEDOR.contains(tipo)) {
-                continue;
-            }
-            if (idsAtualizados.contains(empresa.getId())) {
-                continue;
-            }
-            if (!precisaCorrigirImagens(empresa)) {
-                continue;
-            }
-            EmpresaFix fix = EMPRESAS.get(empresa.getCnpj());
-            if (fix != null) {
-                aplicarFixEmpresa(empresa, fix);
-                empresasAtualizadas++;
-            } else {
-                log.warn(
-                        "Marketplace seed: fornecedora id={} cnpj={} sem imagens e fora do mapa de correção.",
-                        empresa.getId(),
-                        empresa.getCnpj());
-            }
+        log.info("Marketplace seed: {} empresas e {} produtos sincronizados.", empresasAtualizadas, produtosAtualizados);
+    }
+
+    private int sincronizarProduto(Empresa empresa, ProdutoFix fix) {
+        Optional<Produto> existente = produtoRepository.findByEmpresaIdAndAtivo(empresa.getId(), 1).stream()
+                .filter(p -> fix.nome().equals(p.getNome()))
+                .findFirst();
+
+        if (existente.isEmpty()) {
+            existente = produtoRepository.findAll().stream()
+                    .filter(p -> empresa.getId().equals(p.getEmpresa().getId()))
+                    .filter(p -> fix.nome().equals(p.getNome()))
+                    .findFirst();
         }
 
-        log.info("Marketplace seed: {} empresas atualizadas.", empresasAtualizadas);
+        Produto produto = existente.orElseGet(() -> {
+            Produto novo = new Produto();
+            novo.setEmpresa(empresa);
+            novo.setNome(fix.nome());
+            novo.setUnidade("UN");
+            novo.setAtivo(1);
+            novo.setEstoque(BigDecimal.valueOf(fix.estoqueInicial()));
+            return novo;
+        });
 
-        for (ProdutoFix fix : PRODUTOS) {
-            List<Produto> matches = produtoRepository.findAll().stream()
-                    .filter(p -> correspondeProduto(p.getNome(), fix.nome()))
-                    .toList();
-            for (Produto produto : matches) {
-                produto.setNome(fix.nome());
-                produto.setDescricao(fix.descricao());
-                produto.setImagemUrl(fix.imagemUrl());
-                produtoRepository.save(produto);
-            }
+        produto.setNome(fix.nome());
+        produto.setDescricao(fix.descricao());
+        produto.setPrecoVenda(fix.preco());
+        produto.setImagemUrl(fix.imagemUrl());
+        produto.setAtivo(1);
+        if (produto.getEstoque() == null) {
+            produto.setEstoque(BigDecimal.valueOf(fix.estoqueInicial()));
         }
+        produtoRepository.save(produto);
+        return 1;
     }
 
     private void aplicarFixEmpresa(Empresa empresa, EmpresaFix fix) {
@@ -208,25 +175,9 @@ public class MarketplaceDataFixRunner implements ApplicationRunner {
         empresa.setDescricao(fix.descricao());
         empresa.setLogoUrl(fix.logoUrl());
         empresa.setCapaUrl(fix.capaUrl());
-        empresaRepository.save(empresa);
     }
 
-    private boolean precisaCorrigirImagens(Empresa empresa) {
-        if (empresa.getLogoUrl() == null || empresa.getLogoUrl().isBlank()) {
-            return true;
-        }
-        if (empresa.getCapaUrl() == null || empresa.getCapaUrl().isBlank()) {
-            return true;
-        }
-        return empresa.getLogoUrl().contains("images.unsplash.com")
-                || empresa.getCapaUrl().contains("images.unsplash.com");
-    }
-
-    private boolean correspondeProduto(String nomeAtual, String nomeCorreto) {
-        if (nomeAtual == null) return false;
-        if (nomeAtual.equals(nomeCorreto)) return true;
-        String normalizado = nomeAtual.replaceAll("[^a-zA-Z0-9, ]", "").toLowerCase();
-        String alvo = nomeCorreto.replaceAll("[^a-zA-Z0-9, ]", "").toLowerCase();
-        return normalizado.equals(alvo);
+    private static BigDecimal bd(String v) {
+        return new BigDecimal(v);
     }
 }

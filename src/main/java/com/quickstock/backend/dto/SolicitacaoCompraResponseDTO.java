@@ -24,12 +24,16 @@ public class SolicitacaoCompraResponseDTO {
     private final List<ItemSolicitacaoResponseDTO> itens;
     private final String statusLabel;
     private final List<StatusPedidoDTO> etapas;
+    private final Integer previsaoEntregaMinutos;
+    private final String previsaoEntregaLabel;
 
     public SolicitacaoCompraResponseDTO(
             SolicitacaoCompra solicitacao,
             List<ItemSolicitacaoCompra> itens,
             String statusLabel,
-            List<StatusPedidoDTO> etapas) {
+            List<StatusPedidoDTO> etapas,
+            Integer previsaoEntregaMinutos,
+            String previsaoEntregaLabel) {
         this.id = solicitacao.getId();
         this.fornecedorId = solicitacao.getEmpresaFornecedora().getId();
         this.fornecedorNome = solicitacao.getEmpresaFornecedora().getNome();
@@ -43,6 +47,16 @@ public class SolicitacaoCompraResponseDTO {
         this.itens = itens.stream().map(ItemSolicitacaoResponseDTO::new).toList();
         this.statusLabel = statusLabel;
         this.etapas = etapas;
+        this.previsaoEntregaMinutos = previsaoEntregaMinutos;
+        this.previsaoEntregaLabel = previsaoEntregaLabel;
+    }
+
+    public SolicitacaoCompraResponseDTO(
+            SolicitacaoCompra solicitacao,
+            List<ItemSolicitacaoCompra> itens,
+            String statusLabel,
+            List<StatusPedidoDTO> etapas) {
+        this(solicitacao, itens, statusLabel, etapas, null, null);
     }
 
     public SolicitacaoCompraResponseDTO(SolicitacaoCompra solicitacao, List<ItemSolicitacaoCompra> itens) {
