@@ -12,6 +12,7 @@ import java.util.List;
 public class SolicitacaoCompraResponseDTO {
 
     private final Long id;
+    private final Long pedidoId;
     private final Long fornecedorId;
     private final String fornecedorNome;
     private final String status;
@@ -35,6 +36,7 @@ public class SolicitacaoCompraResponseDTO {
             Integer previsaoEntregaMinutos,
             String previsaoEntregaLabel) {
         this.id = solicitacao.getId();
+        this.pedidoId = solicitacao.getPedido() != null ? solicitacao.getPedido().getId() : null;
         this.fornecedorId = solicitacao.getEmpresaFornecedora().getId();
         this.fornecedorNome = solicitacao.getEmpresaFornecedora().getNome();
         this.status = solicitacao.getStatus();

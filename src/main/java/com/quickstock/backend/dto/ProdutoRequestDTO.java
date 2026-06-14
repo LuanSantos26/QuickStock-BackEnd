@@ -12,7 +12,7 @@ import java.math.BigDecimal;
 public class ProdutoRequestDTO {
 
     @NotBlank
-    @Size(max = 150)
+    @Size(max = 300, message = "Nome do produto deve ter no máximo 300 caracteres.")
     private String nome;
 
     @NotNull
@@ -28,6 +28,9 @@ public class ProdutoRequestDTO {
 
     @Size(max = 500)
     private String imagemUrl;
+
+    @DecimalMin("0.0")
+    private BigDecimal estoque;
 
     @NotNull
     private Long empresaId;

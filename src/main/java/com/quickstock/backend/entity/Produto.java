@@ -24,7 +24,8 @@ public class Produto {
     private Empresa empresa;
 
     @NotBlank
-    @Size(max = 150)
+    @Size(max = 300, message = "Nome do produto deve ter no máximo 300 caracteres.")
+    @Column(length = 300)
     private String nome;
 
     @NotNull
@@ -49,4 +50,13 @@ public class Produto {
     @DecimalMin("0.0")
     @Column(precision = 10, scale = 3)
     private BigDecimal estoque;
+
+    @NotBlank
+    @Size(max = 40)
+    @Column(unique = true, nullable = false, length = 40)
+    private String codigo;
+
+    @Size(max = 40)
+    @Column(name = "codigo_origem", length = 40)
+    private String codigoOrigem;
 }

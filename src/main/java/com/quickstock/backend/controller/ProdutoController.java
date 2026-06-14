@@ -6,6 +6,7 @@ import com.quickstock.backend.entity.Empresa;
 import com.quickstock.backend.entity.Produto;
 import com.quickstock.backend.repository.EmpresaRepository;
 import com.quickstock.backend.repository.ProdutoRepository;
+import com.quickstock.backend.service.ProdutoService;
 import com.quickstock.backend.service.ProdutoUploadService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +25,8 @@ public class ProdutoController {
     @Autowired private ProdutoRepository repository;
     @Autowired private EmpresaRepository empresaRepository;
     @Autowired private ProdutoUploadService uploadService;
+    @Autowired private ProdutoService produtoService;
+    @Autowired private EstoqueProdutoService estoqueProdutoService;
 
     @GetMapping
     public List<ProdutoResponseDTO> listar(@RequestParam(required = false) Long empresaId) {
@@ -96,17 +99,17 @@ public class ProdutoController {
         produto.setUnidade(dto.getUnidade());
         produto.setDescricao(dto.getDescricao());
         produto.setImagemUrl(dto.getImagemUrl());
+        if (dto.getEstoque() != null) {
+            produto.setEstoque(dto.getEstoque());
+        }
         return ResponseEntity.ok(new ProdutoResponseDTO(repository.save(produto)));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> desativar(@PathVariable Long id) {
-        if (!repository.existsById(id)) return ResponseEntity.notFound().build();
-        repository.findById(id).ifPresent(produto -> {
-            produto.setAtivo(0);
-            repository.save(produto);
-        });
-        return ResponseEntity.noContent().build();
+    public ResponseEntity<Map<String, String>> desativar(@PathVariable Long id,
+                                                         @RequestParam(required = false) Long empresaId) {
+        produtoService.desativar(id, empresaId);
+        return ResponseEntity.ok(Map.of("mensagem", "Produto removido."));
     }
 
     private Produto mapToEntity(ProdutoRequestDTO dto, Empresa empresa) {
@@ -117,6 +120,8 @@ public class ProdutoController {
         produto.setUnidade(dto.getUnidade());
         produto.setDescricao(dto.getDescricao());
         produto.setImagemUrl(dto.getImagemUrl());
+        produto.setEstoque(dto.getEstoque() != null ? dto.getEstoque() : java.math.BigDecimal.ZERO);
+        produto.setCodigo(estoqueProdutoService.gerarCodigoCatalogo(empresa.getId()));
         return produto;
     }
 }

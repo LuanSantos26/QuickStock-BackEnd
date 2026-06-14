@@ -74,7 +74,14 @@ public class SolicitacaoCompra {
     @Column(name = "taxa_entrega", precision = 10, scale = 2)
     private BigDecimal taxaEntrega = BigDecimal.ZERO;
 
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "pedido_id")
+    private Pedido pedido;
+
     @CreationTimestamp
     @Column(name = "criado_em", updatable = false)
     private LocalDateTime criadoEm;
+
+    @Column(name = "estoque_comprador_creditado", nullable = false)
+    private Boolean estoqueCompradorCreditado = false;
 }

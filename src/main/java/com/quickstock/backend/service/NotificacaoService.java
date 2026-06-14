@@ -18,22 +18,53 @@ import java.util.List;
 @Service
 public class NotificacaoService {
 
-    private static final List<String> TIPOS_FORNECEDOR = List.of("DISTRIBUIDOR", "PLATAFORMA");
+    private static final List<String> TIPOS_DISTRIBUIDORA_DESTAQUE = List.of("DISTRIBUIDOR");
+    /** Contas criadas há menos dias que este limite recebem apenas boas-vindas (+ compras reais). */
+    private static final int DIAS_CONTA_NOVA = 7;
 
     @Autowired private SolicitacaoCompraRepository solicitacaoRepository;
     @Autowired private EmpresaRepository empresaRepository;
 
     public List<NotificacaoDTO> listar(Long empresaCompradoraId) {
-        empresaRepository.findById(empresaCompradoraId)
+        Empresa empresa = empresaRepository.findById(empresaCompradoraId)
                 .orElseThrow(() -> new CadastroException(HttpStatus.BAD_REQUEST, "Empresa não encontrada."));
 
         List<NotificacaoDTO> notificacoes = new ArrayList<>();
         notificacoes.addAll(notificacoesCompras(empresaCompradoraId));
-        notificacoes.addAll(notificacoesPromocoes(empresaCompradoraId));
-        notificacoes.addAll(notificacoesOfertas(empresaCompradoraId));
+
+        if (isContaNova(empresa)) {
+            notificacoes.add(boasVindas(empresa));
+        } else {
+            notificacoes.addAll(notificacoesPromocoes(empresaCompradoraId));
+            notificacoes.addAll(notificacoesOfertas(empresaCompradoraId));
+        }
 
         notificacoes.sort(Comparator.comparing(NotificacaoDTO::getCriadoEm).reversed());
         return notificacoes;
+    }
+
+    private boolean isContaNova(Empresa empresa) {
+        if (empresa.getCriadoEm() == null) {
+            return true;
+        }
+        return empresa.getCriadoEm().isAfter(LocalDateTime.now().minusDays(DIAS_CONTA_NOVA));
+    }
+
+    private NotificacaoDTO boasVindas(Empresa empresa) {
+        String nome = empresa.getNome() != null && !empresa.getNome().isBlank()
+                ? empresa.getNome()
+                : "sua empresa";
+        LocalDateTime criadoEm = empresa.getCriadoEm() != null ? empresa.getCriadoEm() : LocalDateTime.now();
+        return new NotificacaoDTO(
+                "sistema-boas-vindas",
+                "sistema",
+                "Bem-vindo ao QuickStock!",
+                "Olá, " + nome + "! Sua conta foi criada com sucesso. Explore as distribuidoras em destaque e monte seu estoque.",
+                null,
+                null,
+                null,
+                criadoEm
+        );
     }
 
     private List<NotificacaoDTO> notificacoesCompras(Long empresaCompradoraId) {
@@ -79,7 +110,7 @@ public class NotificacaoService {
     }
 
     private List<NotificacaoDTO> notificacoesPromocoes(Long empresaCompradoraId) {
-        List<Empresa> fornecedoras = empresaRepository.findByTipoInAndIdNot(TIPOS_FORNECEDOR, empresaCompradoraId);
+        List<Empresa> fornecedoras = empresaRepository.findByTipoInAndIdNot(TIPOS_DISTRIBUIDORA_DESTAQUE, empresaCompradoraId);
         String[][] promos = {
                 {"10% OFF em Heineken", "Válido até domingo — mínimo 2 fardos."},
                 {"Frete grátis", "Compras acima de R$ 500 na região metropolitana."},
@@ -107,7 +138,7 @@ public class NotificacaoService {
     }
 
     private List<NotificacaoDTO> notificacoesOfertas(Long empresaCompradoraId) {
-        List<Empresa> fornecedoras = empresaRepository.findByTipoInAndIdNot(TIPOS_FORNECEDOR, empresaCompradoraId);
+        List<Empresa> fornecedoras = empresaRepository.findByTipoInAndIdNot(TIPOS_DISTRIBUIDORA_DESTAQUE, empresaCompradoraId);
         if (fornecedoras.size() < 3) return List.of();
 
         List<NotificacaoDTO> lista = new ArrayList<>();

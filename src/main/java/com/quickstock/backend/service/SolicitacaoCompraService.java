@@ -21,7 +21,7 @@ import java.util.List;
 @Service
 public class SolicitacaoCompraService {
 
-    private static final List<String> TIPOS_FORNECEDOR = List.of("DISTRIBUIDOR", "PLATAFORMA");
+    private static final List<String> TIPOS_FORNECEDOR = List.of("DISTRIBUIDOR");
     private static final List<String> METODOS_PAGAMENTO = List.of("pix", "credito", "debito", "dinheiro");
     private static final long SEGUNDOS_PARA_ROTA = 20L;
     private static final long SEGUNDOS_PARA_ENTREGA = 55L;
@@ -32,10 +32,20 @@ public class SolicitacaoCompraService {
     @Autowired private UsuarioRepository usuarioRepository;
     @Autowired private ProdutoRepository produtoRepository;
     @Autowired private EnderecoEntregaService enderecoEntregaService;
+    @Autowired private PedidoRepository pedidoRepository;
+    @Autowired private ItemPedidoRepository itemPedidoRepository;
+    @Autowired private PagamentoRepository pagamentoRepository;
+    @Autowired private EstoqueProdutoService estoqueProdutoService;
 
     public List<SolicitacaoCompraResponseDTO> listarPorComprador(Long empresaCompradoraId) {
         return solicitacaoRepository.findByEmpresaCompradoraIdOrderByCriadoEmDesc(empresaCompradoraId).stream()
-                .map(s -> toResponse(atualizarStatusDemonstracao(s)))
+                .map(s -> {
+                    SolicitacaoCompra atualizada = atualizarStatusDemonstracao(s);
+                    if ("entregue".equals(atualizada.getStatus())) {
+                        estoqueProdutoService.creditarCompradorSeNecessario(atualizada);
+                    }
+                    return toResponse(atualizada);
+                })
                 .toList();
     }
 
@@ -47,7 +57,12 @@ public class SolicitacaoCompraService {
             throw new CadastroException(HttpStatus.BAD_REQUEST, "Pedido não pertence à empresa informada.");
         }
 
-        return toResponse(atualizarStatusDemonstracao(solicitacao));
+        solicitacao = atualizarStatusDemonstracao(solicitacao);
+        if ("entregue".equals(solicitacao.getStatus())) {
+            estoqueProdutoService.creditarCompradorSeNecessario(solicitacao);
+        }
+
+        return toResponse(solicitacao);
     }
 
     @Transactional
@@ -134,8 +149,7 @@ public class SolicitacaoCompraService {
                 );
             }
 
-            produto.setEstoque(estoqueAtual.subtract(itemDto.getQuantidade()));
-            produtoRepository.save(produto);
+            estoqueProdutoService.debitarEstoque(produto, itemDto.getQuantidade());
 
             BigDecimal subtotal = produto.getPrecoVenda().multiply(itemDto.getQuantidade());
 
@@ -153,7 +167,82 @@ public class SolicitacaoCompraService {
         solicitacao.setValorTotal(total.add(taxaEntrega));
         solicitacao = solicitacaoRepository.save(solicitacao);
 
+        Pedido pedido = criarPedidoMarketplace(
+                dto,
+                compradora,
+                fornecedora,
+                usuario,
+                endereco,
+                metodoPagamento,
+                taxaEntrega,
+                solicitacao.getValorTotal(),
+                itemRepository.findBySolicitacaoId(solicitacao.getId())
+        );
+        solicitacao.setPedido(pedido);
+        solicitacao = solicitacaoRepository.save(solicitacao);
+
         return toResponse(solicitacao);
+    }
+
+    private Pedido criarPedidoMarketplace(
+            SolicitacaoCompraRequestDTO dto,
+            Empresa compradora,
+            Empresa fornecedora,
+            Usuario usuario,
+            EnderecoEntrega endereco,
+            String metodoPagamento,
+            BigDecimal taxaEntrega,
+            BigDecimal valorTotal,
+            List<ItemSolicitacaoCompra> itensSolicitacao) {
+
+        Pedido pedido = new Pedido();
+        pedido.setTipo("marketplace");
+        pedido.setOperador(usuario);
+        pedido.setEmpresaCompradora(compradora);
+        pedido.setEmpresaFornecedora(fornecedora);
+        pedido.setEnderecoEntrega(endereco);
+        pedido.setEnderecoResumo(EnderecoEntregaDTO.formatarResumo(endereco));
+        pedido.setCep(endereco.getCep());
+        pedido.setLogradouro(endereco.getLogradouro());
+        pedido.setNumero(endereco.getNumero());
+        pedido.setComplemento(endereco.getComplemento());
+        pedido.setBairro(endereco.getBairro());
+        pedido.setCidade(endereco.getCidade());
+        pedido.setUf(endereco.getUf());
+        pedido.setMetodoPagamento(metodoPagamento);
+        pedido.setTaxaEntrega(taxaEntrega);
+        pedido.setObservacao(dto.getObservacao());
+        pedido.setStatus("aguardando_liberacao");
+        pedido.setValorTotal(valorTotal);
+        pedido = pedidoRepository.save(pedido);
+
+        for (ItemSolicitacaoCompra itemSolicitacao : itensSolicitacao) {
+            ItemPedido itemPedido = new ItemPedido();
+            itemPedido.setPedido(pedido);
+            itemPedido.setProduto(itemSolicitacao.getProduto());
+            itemPedido.setQuantidade(itemSolicitacao.getQuantidade());
+            itemPedido.setPrecoUnitario(itemSolicitacao.getPrecoUnitario());
+            itemPedido.setSubtotal(itemSolicitacao.getSubtotal());
+            itemPedidoRepository.save(itemPedido);
+        }
+
+        Pagamento pagamento = new Pagamento();
+        pagamento.setPedido(pedido);
+        pagamento.setMetodo(metodoPagamento);
+        pagamento.setValor(valorTotal);
+        pagamento.setReferenciaPagamento(dto.getPagamentoReferencia());
+        pagamento.setStatus(statusPagamentoSimulado(metodoPagamento));
+        pagamentoRepository.save(pagamento);
+
+        return pedido;
+    }
+
+    private String statusPagamentoSimulado(String metodoPagamento) {
+        return switch (metodoPagamento) {
+            case "pix", "credito", "debito" -> "aprovado";
+            case "dinheiro" -> "pendente";
+            default -> "pendente";
+        };
     }
 
     private SolicitacaoCompra atualizarStatusDemonstracao(SolicitacaoCompra solicitacao) {
@@ -169,7 +258,9 @@ public class SolicitacaoCompraService {
 
         if ("em_rota".equals(status) && segundos >= SEGUNDOS_PARA_ENTREGA) {
             solicitacao.setStatus("entregue");
-            return solicitacaoRepository.save(solicitacao);
+            solicitacao = solicitacaoRepository.save(solicitacao);
+            estoqueProdutoService.creditarCompradorSeNecessario(solicitacao);
+            return solicitacao;
         }
 
         return solicitacao;

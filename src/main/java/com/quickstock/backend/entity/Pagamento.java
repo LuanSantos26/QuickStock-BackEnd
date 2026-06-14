@@ -36,4 +36,8 @@ public class Pagamento {
 
     @Column(nullable = false, length = 20)
     private String status = "pendente";
+
+    @Size(max = 120)
+    @Column(name = "referencia_pagamento")
+    private String referenciaPagamento;
 }

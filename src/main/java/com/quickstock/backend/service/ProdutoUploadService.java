@@ -15,9 +15,10 @@ import java.util.UUID;
 public class ProdutoUploadService {
 
     private static final Set<String> TIPOS_PERMITIDOS = Set.of(
-            "image/jpeg", "image/jpg", "image/png", "image/webp", "application/octet-stream"
+            "image/jpeg", "image/jpg", "image/png", "image/webp",
+            "image/heic", "image/heif", "application/octet-stream"
     );
-    private static final long TAMANHO_MAX_BYTES = 5 * 1024 * 1024;
+    private static final long TAMANHO_MAX_BYTES = 10 * 1024 * 1024;
 
     @Value("${upload.dir:uploads/produtos}")
     private String uploadDir;
@@ -28,12 +29,12 @@ public class ProdutoUploadService {
         }
 
         if (file.getSize() > TAMANHO_MAX_BYTES) {
-            throw new IllegalArgumentException("Imagem deve ter no máximo 5 MB.");
+            throw new IllegalArgumentException("Imagem deve ter no máximo 10 MB.");
         }
 
         String contentType = file.getContentType();
         String nomeOriginal = file.getOriginalFilename();
-        if (contentType == null || !TIPOS_PERMITIDOS.contains(contentType)) {
+        if (!tipoPermitido(contentType, nomeOriginal)) {
             throw new IllegalArgumentException("Formato de imagem não suportado. Use JPEG, PNG ou WebP.");
         }
 
@@ -49,12 +50,26 @@ public class ProdutoUploadService {
         return "/uploads/produtos/" + nomeArquivo;
     }
 
+    private boolean tipoPermitido(String contentType, String nomeOriginal) {
+        if (contentType != null && TIPOS_PERMITIDOS.contains(contentType)) {
+            return true;
+        }
+        if (nomeOriginal == null) {
+            return false;
+        }
+        String nome = nomeOriginal.toLowerCase();
+        return nome.endsWith(".jpg") || nome.endsWith(".jpeg")
+                || nome.endsWith(".png") || nome.endsWith(".webp")
+                || nome.endsWith(".heic") || nome.endsWith(".heif");
+    }
+
     private String resolverExtensao(String contentType, String nomeOriginal) {
         if (nomeOriginal != null) {
             String nome = nomeOriginal.toLowerCase();
             if (nome.endsWith(".png")) return "png";
             if (nome.endsWith(".webp")) return "webp";
             if (nome.endsWith(".jpg") || nome.endsWith(".jpeg")) return "jpg";
+            if (nome.endsWith(".heic") || nome.endsWith(".heif")) return "jpg";
         }
 
         return switch (contentType) {

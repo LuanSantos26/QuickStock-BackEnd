@@ -33,6 +33,12 @@ public class SolicitacaoCompraRequestDTO {
 
     private BigDecimal taxaEntrega;
 
+    @Size(max = 120)
+    private String pagamentoReferencia;
+
+    @Size(max = 300)
+    private String pagamentoDetalhes;
+
     @Valid
     private List<ItemSolicitacaoRequestDTO> itens = new ArrayList<>();
 }
