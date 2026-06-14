@@ -1,84 +1,112 @@
-# 📦 QuickStock - Back-End API
+📦 QuickStock - Back-end
+O QuickStock Back-end é uma API RESTful desenvolvida em Java com Spring Boot. Este sistema fornece toda a infraestrutura necessária para a gestão de inventário, controlo de vendas, gestão de eventos (com alocação de barracas), processamento financeiro e autenticação de utilizadores.
 
-O **QuickStock** é um sistema robusto de back-end projetado para gerenciar operações de estoque, vendas e controle financeiro em eventos. Desenvolvida com foco em escalabilidade e organização de dados, esta API RESTful atende às necessidades operacionais de empresas que gerenciam múltiplos pontos de venda simultaneamente.
+🚀 Tecnologias Utilizadas
+O projeto foi construído utilizando as seguintes tecnologias e bibliotecas:
 
----
+Java 17 - Linguagem principal.
 
-## 🚀 Funcionalidades Principais
+Spring Boot 3.4.0 - Framework base para a aplicação web.
 
-A arquitetura do sistema engloba as seguintes áreas de negócio:
+Spring Data JPA / Hibernate - Mapeamento objeto-relacional (ORM) e persistência de dados.
 
-* **Gestão de Entidades Base:** Cadastro, controle e relacionamento entre `Empresa`, `Evento` e `Perfil` de acesso.
-* **Controle de Estoque Setorizado:** Gerenciamento centralizado de `Produto` e `Barraca` (pontos de venda), com controle específico e independente de `EstoqueBarraca`.
-* **Fluxo de Caixa (PDV):** Processamento completo do ciclo de vendas, incluindo a criação de um `Pedido`, a adição de múltiplos `ItemPedido` e a conciliação do `Pagamento`.
-* **Segurança e Usuários:** Controle de acesso através da entidade `Usuario`, utilizando objetos de transferência de dados (como o `UsuarioResponseDTO`) para garantir que dados sensíveis não sejam expostos nas respostas da API.
+PostgreSQL - Base de dados relacional principal.
 
----
+Lombok - Redução de código repetitivo (Getters, Setters, Construtores).
 
-## 🛠️ Tecnologias Utilizadas
+JJWT (JSON Web Token) - Autenticação e autorização seguras (implementação customizada sem bloqueios estritos do Spring Security).
 
-A aplicação foi construída com tecnologias modernas e consolidadas do ecossistema corporativo:
+Springdoc OpenAPI (Swagger) - Documentação automática e interativa da API.
 
-* **Linguagem:** Java
-* **Framework Principal:** Spring Boot (`BackendApplication.java`)
-* **Gerenciamento de Dependências:** Maven (utilizando o wrapper nativo `mvnw` e `pom.xml`)
-* **Persistência de Dados:** Spring Data JPA / Hibernate (configurável via `application.properties`)
+Maven - Gestão de dependências e automação de build.
 
----
+⚙️ Funcionalidades Principais
+Gestão de Utilizadores e Perfis: Registo, login com JWT e controlo de acessos (Administradores, Vendedores, etc.).
 
-## 📂 Arquitetura do Projeto
+Gestão de Stock e Produtos: Criação de produtos, controlo de quantidades, catálogos e gestão de múltiplos fornecedores/marketplaces.
 
-O código-fonte segue o padrão arquitetural em camadas, facilitando a manutenção e a injeção de dependências:
+Gestão de Eventos e Barracas: Organização de eventos, alocação de stock físico para barracas específicas e acompanhamento de vendas em tempo real.
 
-* `controller/`: Camada de exposição dos endpoints da API REST (ex: `ProdutoController`, `PedidoController`).
-* `entity/`: Modelagem de domínio e mapeamento objeto-relacional (ORM) das tabelas do banco de dados.
-* `repository/`: Interfaces do Spring Data para abstração do acesso e manipulação dos dados (ex: `PagamentoRepository`, `EventoRepository`).
-* `dto/`: Contratos de entrada e saída (Data Transfer Objects) para otimização e segurança das requisições.
+Processamento de Pedidos: Carrinho de compras, histórico de pedidos e alteração de estados de envio/entrega.
 
----
+Módulo Financeiro: Registo de pagamentos, gestão de cartões/formas de pagamento guardadas e visualização de resumos financeiros mensais (lucros, valores e pedidos).
 
-## ⚙️ Como Executar Localmente
+Upload de Ficheiros: Sistema integrado para upload e fornecimento estático de imagens de produtos e logótipos de empresas.
 
-### Pré-requisitos
-* **Java Development Kit (JDK):** Versão 17 ou superior instalada.
-* **Banco de Dados:** PostgreSQL configurado e rodando localmente na porta `5432`.
+📋 Pré-requisitos
+Para executar este projeto localmente, precisará de ter instalado no seu ambiente:
 
-### Passos para Instalação
+Java Development Kit (JDK) 17 ou superior.
 
-1. **Clone o repositório** para a sua máquina:
-   ```bash
-   git clone [https://github.com/luansantos26/quickstock-backend.git](https://github.com/luansantos26/quickstock-backend.git)
-   ```
+Apache Maven (opcional, o projeto inclui o Maven Wrapper mvnw).
 
-2. **Navegue até a raiz do projeto:**
-   ```bash
-   cd quickstock-backend
-   ```
+PostgreSQL (em execução na porta 5432).
 
-3. **Configure as variáveis de ambiente:**
-   Acesse o arquivo `src/main/resources/application.properties` e verifique as credenciais (URL, usuário e senha) do seu banco de dados local. Elas devem bater com as do seu PostgreSQL:
-   ```properties
-   spring.datasource.url=jdbc:postgresql://localhost:5432/quickstock
-   spring.datasource.username=postgres
-   spring.datasource.password=123456
-   ```
+🛠️ Configuração do Ambiente
+Clone o repositório:
 
-4. **Compile e execute a aplicação:**
-   Utilize o Maven Wrapper incluso no projeto para baixar as dependências e iniciar o servidor.
+Bash
+git clone https://github.com/luansantos26/quickstock-backend.git
+cd quickstock-backend
+Configure a Base de Dados:
+Abra o ficheiro src/main/resources/application.properties e ajuste as credenciais do PostgreSQL, caso sejam diferentes do padrão:
 
-   * **No Linux / macOS:**
-     ```bash
-     ./mvnw spring-boot:run
-     ```
-   * **No Windows:**
-     ```cmd
-     mvnw.cmd spring-boot:run
-     ```
+Properties
+spring.datasource.url=jdbc:postgresql://localhost:5432/quickstock
+spring.datasource.username=postgres
+spring.datasource.password=admin # Altere para a sua palavra-passe
+Configuração de Diretórios de Imagens:
+O projeto guarda e serve imagens localmente. Certifique-se de que a aplicação tem permissões de escrita na diretoria definida em upload.dir no ficheiro application.properties (por defeito: uploads/produtos).
 
-A API será inicializada e estará pronta para receber requisições HTTP na porta configurada (padrão: `8080`).
+▶️ Execução do Projeto
+Pode executar a aplicação diretamente através do terminal utilizando o Maven Wrapper incluído no projeto:
 
----
+Em Windows:
 
-## 👨‍💻 Autores
+DOS
+mvnw.cmd spring-boot:run
+Em Linux/macOS:
 
-Desenvolvido por **Luan Feitosa Santos**,   **José Italo S C Dantas**,   **Marcelo Vitor Viana da Silva**,   **Leticia Viviane Pereira da Silva**.
+Bash
+./mvnw spring-boot:run
+A API ficará disponível no endereço: http://localhost:8080.
+
+(Nota: Na primeira execução, o Hibernate irá criar automaticamente as tabelas na base de dados, e os ficheiros SeedRunner irão popular os dados iniciais necessários, como formas de pagamento e endereços padrão).
+
+📚 Documentação da API (Swagger)
+A API está totalmente documentada através do Swagger/OpenAPI. Uma vez que o servidor esteja em execução, pode aceder à interface gráfica interativa para explorar e testar os endpoints.
+
+Interface Gráfica (Atalho configurado): http://localhost:8080/swagger
+
+Interface Gráfica (Caminho completo): http://localhost:8080/swagger-ui/index.html
+
+Especificação JSON (OpenAPI 3): http://localhost:8080/v3/api-docs
+
+📁 Estrutura do Código-Fonte
+O projeto segue a arquitetura em camadas padrão do Spring Boot:
+
+config/: Classes de configuração global (CORS, mapeamento de recursos estáticos do WebConfig, Seeds de base de dados).
+
+controller/: Endpoints REST que recebem as requisições HTTP e devolvem as respostas.
+
+dto/: Data Transfer Objects utilizados para mapear dados de entrada (Request) e saída (Response), mantendo as entidades protegidas.
+
+entity/: Modelos de domínio que representam as tabelas na base de dados PostgreSQL.
+
+exception/: Tratamento global de erros e exceções customizadas (GlobalExceptionHandler).
+
+repository/: Interfaces do Spring Data JPA para comunicação direta com a base de dados.
+
+service/: Camada de regras de negócio, processamento de lógica e validações estruturais.
+
+🔒 Segurança (JWT)
+Este projeto utiliza JSON Web Tokens (JWT) para garantir que as operações sensíveis são feitas de forma segura.
+A chave secreta e o tempo de expiração do token podem ser ajustados no ficheiro application.properties:
+
+Properties
+jwt.secret=SuaChaveSecretaSuperSeguraAqui
+jwt.expiration-ms=86400000 # Duração em milissegundos (ex: 24 horas)
+A segurança das rotas (validação de tokens) é gerida manualmente nos serviços/controladores relevantes, proporcionando flexibilidade na documentação e no acesso público a rotas específicas.
+
+👨‍💻 Autores
+Desenvolvido por Luan Feitosa Santos, José Italo S C Dantas, Marcelo Vitor Viana da Silva, Leticia Viviane Pereira da Silva.
