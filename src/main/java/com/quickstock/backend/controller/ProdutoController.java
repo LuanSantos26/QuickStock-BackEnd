@@ -6,6 +6,7 @@ import com.quickstock.backend.entity.Empresa;
 import com.quickstock.backend.entity.Produto;
 import com.quickstock.backend.repository.EmpresaRepository;
 import com.quickstock.backend.repository.ProdutoRepository;
+import com.quickstock.backend.service.EstoqueProdutoService;
 import com.quickstock.backend.service.ProdutoService;
 import com.quickstock.backend.service.ProdutoUploadService;
 import jakarta.validation.Valid;
