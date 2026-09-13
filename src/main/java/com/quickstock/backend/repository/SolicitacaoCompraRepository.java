@@ -17,12 +17,10 @@ public interface SolicitacaoCompraRepository extends JpaRepository<SolicitacaoCo
             SELECT s FROM SolicitacaoCompra s
             WHERE s.empresaCompradora.id = :empresaId
             AND s.criadoEm >= :desde AND s.criadoEm < :ate
-            AND (s.observacao IS NULL OR s.observacao <> :seedObs)
             ORDER BY s.criadoEm DESC
             """)
     List<SolicitacaoCompra> findComprasPorEmpresaNoPeriodo(
             @Param("empresaId") Long empresaId,
             @Param("desde") LocalDateTime desde,
-            @Param("ate") LocalDateTime ate,
-            @Param("seedObs") String seedObs);
+            @Param("ate") LocalDateTime ate);
 }

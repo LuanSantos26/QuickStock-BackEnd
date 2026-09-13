@@ -23,7 +23,6 @@ import java.util.stream.Collectors;
 @Service
 public class FinanceiroService {
 
-    private static final String OBS_SEED = "SEED_FINANCEIRO_DEMO";
     private static final DateTimeFormatter MES_FMT = DateTimeFormatter.ofPattern("yyyy-MM");
     private static final String[] LABELS_PT = {
             "Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"
@@ -53,7 +52,7 @@ public class FinanceiroService {
         LocalDateTime ate = meses.get(meses.size() - 1).plusMonths(1).atDay(1).atStartOfDay();
 
         List<SolicitacaoCompra> comprasPeriodo = solicitacaoRepository
-                .findComprasPorEmpresaNoPeriodo(empresaCompradoraId, desde, ate, OBS_SEED);
+                .findComprasPorEmpresaNoPeriodo(empresaCompradoraId, desde, ate);
         List<Pedido> vendasPeriodo = pedidoRepository
                 .findVendasPorEmpresaNoPeriodo(empresaCompradoraId, desde, ate);
 
@@ -140,7 +139,7 @@ public class FinanceiroService {
         DateTimeFormatter horaFmt = DateTimeFormatter.ofPattern("HH:mm");
 
         List<SolicitacaoCompra> comprasHoje = solicitacaoRepository
-                .findComprasPorEmpresaNoPeriodo(empresaCompradoraId, inicio, fim, OBS_SEED);
+                .findComprasPorEmpresaNoPeriodo(empresaCompradoraId, inicio, fim);
 
         BigDecimal totalCompras = comprasHoje.stream()
                 .map(this::valorCompra)

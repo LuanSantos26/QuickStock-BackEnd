@@ -282,7 +282,7 @@ git push origin feature/minha-feature
 * José Ítalo S. C. Dantas
 * Marcelo Vitor Viana da Silva
 * Leticia Viviane Pereira da Silva
-
+* José Lucas Luiz da Silva 
 ---
 
 ## 📄 Licença
