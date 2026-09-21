@@ -1,46 +1,33 @@
-# Maven
+HELP.md
 target/
-!.mvn/wrapper/maven-wrapper.jar
-.mvn/timing.properties
-pom.xml.tag
-pom.xml.releaseBackup
-pom.xml.versionsBackup
-pom.xml.next
-release.properties
-dependency-reduced-pom.xml
+.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
 
-# Java
-*.class
-*.log
-hs_err_pid*
-
-# IntelliJ IDEA
-.idea/
-*.iml
-*.iws
-*.ipr
-
-# Eclipse / STS
+### STS ###
+.apt_generated
 .classpath
+.factorypath
 .project
-.settings/
+.settings
 .springBeans
 .sts4-cache
-.factorypath
-.apt_generated
 
-# Build
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
 build/
-.gradle/
+!**/src/main/**/build/
+!**/src/test/**/build/
 
-# Windows
-Thumbs.db
-ehthumbs.db
-Desktop.ini
-*.lnk
-
-# OS
-.DS_Store
-
-# VS Code
+### VS Code ###
 .vscode/
