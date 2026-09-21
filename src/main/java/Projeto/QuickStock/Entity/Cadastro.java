@@ -1,18 +1,31 @@
 package Projeto.QuickStock.Entity;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 
 @Entity
-public class Cadasto {
+public class Cadastro {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
     private String Nome;
     private String Email;
     private String Senha;
     private String Telefone;
     private String cnpj;
-    private Escolhar Fornecedor;
-    private Escolhar Cliente;
+    private Escolhar Tipo;
 
-    public Cadasto() {
+    public Cadastro() {
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public String getEmail() {
@@ -55,19 +68,11 @@ public class Cadasto {
         this.cnpj = cnpj;
     }
 
-    public Escolhar getFornecedor() {
-        return Fornecedor;
+    public Escolhar getTipo() {
+        return Tipo;
     }
 
-    public void setFornecedor(Escolhar fornecedor) {
-        Fornecedor = fornecedor;
-    }
-
-    public Escolhar getCliente() {
-        return Cliente;
-    }
-
-    public void setCliente(Escolhar cliente) {
-        Cliente = cliente;
+    public void setTipo(Escolhar tipo) {
+        Tipo = tipo;
     }
 }
