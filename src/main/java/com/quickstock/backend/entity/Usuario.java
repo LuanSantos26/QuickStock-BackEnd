@@ -46,6 +46,13 @@ public class Usuario {
     @Column(nullable = false)
     private Integer ativo = 1;
 
+    @Size(max = 30)
+    @Column(name = "perfil_uso")
+    private String perfilUso = "Fornecedor";
+
+    @Size(max = 14)
+    private String cpf;
+
     @CreationTimestamp
     @Column(name = "criado_em", updatable = false)
     private LocalDateTime criadoEm;

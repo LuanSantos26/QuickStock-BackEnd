@@ -18,7 +18,7 @@ import java.util.List;
 @Service
 public class NotificacaoService {
 
-    private static final List<String> TIPOS_DISTRIBUIDORA_DESTAQUE = List.of("DISTRIBUIDOR");
+    private static final List<String> TIPOS_DISTRIBUIDORA_DESTAQUE = List.of("DISTRIBUIDOR", "AMBOS");
     /** Contas criadas há menos dias que este limite recebem apenas boas-vindas (+ compras reais). */
     private static final int DIAS_CONTA_NOVA = 7;
 

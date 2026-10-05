@@ -90,12 +90,41 @@ public class UsuarioController {
         return ResponseEntity.status(201).body(new UsuarioResponseDTO(usuarioRepository.save(u)));
     }
 
+    @PostMapping("/recuperar-senha")
+    public ResponseEntity<?> recuperarSenha(@RequestBody Map<String, String> body) {
+        String email = body.get("email");
+        String novaSenha = body.get("novaSenha");
+
+        if (email == null || email.isBlank()) {
+            return ResponseEntity.badRequest().body(Map.of("erro", "Informe o e-mail."));
+        }
+        if (novaSenha == null || novaSenha.length() < 6) {
+            return ResponseEntity.badRequest().body(Map.of("erro", "A nova senha deve ter pelo menos 6 caracteres."));
+        }
+
+        return usuarioRepository.findByEmailIgnoreCase(email.trim())
+                .map(u -> {
+                    String hash = org.springframework.security.crypto.bcrypt.BCrypt.hashpw(
+                            novaSenha,
+                            org.springframework.security.crypto.bcrypt.BCrypt.gensalt()
+                    );
+                    u.setSenhaHash(hash);
+                    usuarioRepository.save(u);
+                    return ResponseEntity.ok(Map.of("mensagem", "Senha atualizada."));
+                })
+                .orElse(ResponseEntity.status(404).body(Map.of("erro", "E-mail não encontrado.")));
+    }
+
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody Map<String, String> body) {
         String email = body.get("email");
         String senha = body.get("senha");
 
-        return usuarioRepository.findByEmail(email)
+        if (email == null || email.isBlank() || senha == null) {
+            return ResponseEntity.status(401).body(Map.of("erro", "E-mail ou senha incorretos."));
+        }
+
+        return usuarioRepository.findByEmailIgnoreCase(email.trim())
                 .filter(u -> u.getAtivo() == 1)
                 .filter(u -> org.springframework.security.crypto.bcrypt.BCrypt.checkpw(senha, u.getSenhaHash()))
                 .map(u -> {

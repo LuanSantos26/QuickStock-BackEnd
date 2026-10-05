@@ -44,3 +44,7 @@ Desktop.ini
 
 # VS Code
 .vscode/
+
+# Geração do relatório (dependências locais)
+docs/node_modules/
+docs/.preview/

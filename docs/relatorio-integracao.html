@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Integração do aplicativo móvel QuickStock com a API de back-end</title>
+  <style>
+    @page {
+      size: A4;
+      margin: 3cm 2cm 2cm 3cm;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: #fff;
+      color: #000;
+      font-family: "Times New Roman", Times, serif;
+      font-size: 12pt;
+      line-height: 1.5;
+    }
+
+    .sheet { page-break-after: always; }
+    .cover, .rosto {
+      height: 23.4cm;
+      display: flex;
+      flex-direction: column;
+      page-break-after: always;
+      page-break-inside: avoid;
+      overflow: hidden;
+    }
+
+    .cover-top, .rosto-top {
+      text-align: center;
+      margin-top: 1.2cm;
+    }
+
+    .cover-authors, .rosto-authors {
+      margin-top: 3.2cm;
+      text-align: center;
+      line-height: 1.5;
+    }
+
+    .cover-title, .rosto-title {
+      margin-top: 3.4cm;
+      text-align: center;
+      font-weight: bold;
+      font-size: 14pt;
+      line-height: 1.5;
+      text-transform: uppercase;
+    }
+
+    .cover-bottom, .rosto-bottom {
+      margin-top: auto;
+      text-align: center;
+      line-height: 1.5;
+    }
+
+    .natureza {
+      margin-top: 3.2cm;
+      margin-left: 7.5cm;
+      font-size: 10pt;
+      line-height: 1;
+      text-align: justify;
+      text-indent: 0;
+    }
+
+    h1 {
+      font-size: 12pt;
+      font-weight: bold;
+      text-align: left;
+      text-transform: uppercase;
+      margin: 1.5em 0 1em;
+      page-break-before: auto;
+      page-break-after: avoid;
+    }
+
+    h1.pre {
+      text-align: center;
+      margin-top: 0;
+      page-break-before: auto;
+      page-break-after: avoid;
+    }
+
+    h1.primeira {
+      margin-top: 0;
+      page-break-before: auto;
+    }
+
+    h2 {
+      font-size: 12pt;
+      font-weight: bold;
+      text-align: left;
+      text-transform: none;
+      margin: 1.4em 0 1em;
+      page-break-after: avoid;
+    }
+
+    p {
+      margin: 0 0 0;
+      text-align: justify;
+      text-indent: 1.25cm;
+    }
+
+    p + p { margin-top: 0; }
+
+    .sem-recuo { text-indent: 0; }
+
+    .resumo p { line-height: 1; font-size: 12pt; text-indent: 0; text-align: justify; }
+    .resumo .palavras { margin-top: 1.2em; text-indent: 0; line-height: 1; }
+
+    .siglas p, .listas p {
+      text-indent: 0;
+      margin: 0 0 0.35em;
+      line-height: 1.5;
+    }
+
+    .toc p {
+      text-indent: 0;
+      margin: 0.15em 0;
+      line-height: 1.5;
+    }
+
+    .toc-row {
+      display: flex;
+      align-items: flex-end;
+      gap: 0.3em;
+    }
+
+    .toc-row .titulo { white-space: nowrap; }
+    .toc-row.nivel2 { padding-left: 1.25cm; }
+    .toc-row .pontos {
+      flex: 1;
+      border-bottom: 1px dotted #000;
+      margin: 0 0.25em 0.28em;
+      min-width: 1cm;
+    }
+    .toc-row .pag {
+      min-width: 1.4em;
+      text-align: right;
+    }
+    .toc-row.primario .titulo { font-weight: bold; text-transform: uppercase; }
+    .toc-row.pre .titulo { text-transform: uppercase; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 0.6em 0 0.2em;
+      font-size: 10pt;
+      line-height: 1.15;
+      page-break-inside: avoid;
+      page-break-after: avoid;
+    }
+
+    caption {
+      caption-side: top;
+      text-align: center;
+      font-size: 10pt;
+      font-weight: normal;
+      margin-bottom: 0.35em;
+      line-height: 1.15;
+    }
+
+    th, td {
+      text-align: left;
+      vertical-align: top;
+      padding: 4px 6px 4px 0;
+      border: none;
+    }
+
+    thead th {
+      border-top: 1px solid #000;
+      border-bottom: 1px solid #000;
+      font-weight: bold;
+    }
+
+    tbody tr:last-child td { border-bottom: 1px solid #000; }
+
+    td.rota, th.rota { font-family: "Courier New", Courier, monospace; font-size: 9pt; }
+
+    .fonte {
+      font-size: 10pt;
+      line-height: 1;
+      text-align: center;
+      text-indent: 0;
+      margin: 0.35em 0 1em;
+      page-break-before: avoid;
+    }
+
+    figure {
+      margin: 0.8em 0 0.4em;
+      page-break-inside: avoid;
+      page-break-after: avoid;
+    }
+
+    .bloco { page-break-inside: avoid; }
+    figcaption {
+      text-align: center;
+      font-size: 10pt;
+      line-height: 1.15;
+      margin-top: 0.45em;
+    }
+
+    .mk {
+      font-size: 1pt;
+      line-height: 0;
+      color: #ffffff;
+    }
+
+    code, .mono { font-family: "Courier New", Courier, monospace; font-size: 10pt; }
+
+    .ref p {
+      padding-left: 1.25cm;
+      text-indent: -1.25cm;
+      margin: 0 0 0.8em;
+      text-align: left;
+      line-height: 1.15;
+      overflow-wrap: anywhere;
+    }
+
+    a { color: #000; text-decoration: none; }
+  </style>
+</head>
+<body>
+
+<section class="sheet cover">
+  <div class="cover-top">QUICKSTOCK</div>
+  <div class="cover-authors">
+    José Ítalo S. C. Dantas<br />
+    Leticia Viviane Pereira da Silva<br />
+    Luan Feitosa Santos<br />
+    Marcelo Vitor Viana da Silva
+  </div>
+  <div class="cover-title">
+    Integração do aplicativo móvel QuickStock<br />com a API de back-end
+  </div>
+  <div class="cover-bottom">
+    Caruaru<br />2026
+  </div>
+</section>
+
+<section class="sheet rosto">
+  <div class="rosto-top">QUICKSTOCK</div>
+  <div class="rosto-authors">
+    José Ítalo S. C. Dantas<br />
+    Leticia Viviane Pereira da Silva<br />
+    Luan Feitosa Santos<br />
+    Marcelo Vitor Viana da Silva
+  </div>
+  <div class="rosto-title">
+    Integração do aplicativo móvel QuickStock<br />com a API de back-end
+  </div>
+  <p class="natureza">
+    Relatório técnico que registra a API já em funcionamento e as alterações feitas para ligar o aplicativo móvel ao back-end, em especial o perfil de cadastro, a recuperação de senha e o módulo de logística. O cenário de demonstração do sistema usa empresas de Caruaru e região.
+  </p>
+  <div class="rosto-bottom">
+    Caruaru<br />2026
+  </div>
+</section>
+
+<section class="sheet resumo">
+  <h1 class="pre"><span class="mk">#resumo#</span>Resumo</h1>
+  <p>
+    O QuickStock é um sistema de estoque, compras e operação de quiosques. O aplicativo, escrito em React Native com Expo, conversa com uma API REST em Java 17, Spring Boot 3.4 e PostgreSQL. Antes da integração descrita aqui, produtos, quiosques, marketplace, endereços, pagamentos, notificações e o resumo financeiro já eram lidos e gravados por essa API. O cadastro não persistia a escolha entre cliente, fornecedor ou os dois papéis: a conta nascia com perfil administrativo e a empresa ficava como compradora, enquanto o aplicativo guardava a escolha apenas no aparelho. A tela de nova senha chamava uma rota que não existia. Caminhoneiros e logística usavam listas fixas na tela. Este relatório explica o que já estava pronto e o que foi acrescentado: a coluna de perfil de uso, a classificação da empresa, a rota de recuperação de senha, a entrada de empresas dos dois papéis no marketplace e os recursos de caminhoneiro e de resumo logístico. O atalho de login que não passava pela API foi removido do aplicativo.
+  </p>
+  <p class="palavras"><strong>Palavras-chave:</strong> QuickStock. API REST. Aplicativo móvel. Cadastro. Logística.</p>
+</section>
+
+<section class="sheet listas">
+  <h1 class="pre"><span class="mk">#listailust#</span>Lista de ilustrações</h1>
+  <p class="toc-row"><span class="titulo">Figura 1 – Camadas da API e o ponto em que o aplicativo entra</span><span class="pontos"></span><span class="pag">__P_fig1__</span></p>
+  <p class="toc-row"><span class="titulo">Figura 2 – Perfil escolhido no cadastro e tipo gravado na empresa</span><span class="pontos"></span><span class="pag">__P_fig2__</span></p>
+  <p class="toc-row"><span class="titulo">Figura 3 – Caminho do cadastro até as abas do aplicativo</span><span class="pontos"></span><span class="pag">__P_fig3__</span></p>
+  <p class="toc-row"><span class="titulo">Figura 4 – Empresa, caminhoneiro e entrega</span><span class="pontos"></span><span class="pag">__P_fig4__</span></p>
+  <p class="toc-row"><span class="titulo">Figura 5 – Etapas montadas para a tela de logística</span><span class="pontos"></span><span class="pag">__P_fig5__</span></p>
+</section>
+
+<section class="sheet listas">
+  <h1 class="pre"><span class="mk">#listatab#</span>Lista de tabelas</h1>
+  <p class="toc-row"><span class="titulo">Tabela 1 – Recursos que o aplicativo já consumia</span><span class="pontos"></span><span class="pag">__P_tab1__</span></p>
+  <p class="toc-row"><span class="titulo">Tabela 2 – Perfil de uso e tipo da empresa</span><span class="pontos"></span><span class="pag">__P_tab2__</span></p>
+  <p class="toc-row"><span class="titulo">Tabela 3 – Rotas acrescentadas nesta integração</span><span class="pontos"></span><span class="pag">__P_tab3__</span></p>
+  <p class="toc-row"><span class="titulo">Tabela 4 – Status da entrega e texto mostrado na tela</span><span class="pontos"></span><span class="pag">__P_tab4__</span></p>
+</section>
+
+<section class="sheet siglas">
+  <h1 class="pre"><span class="mk">#siglas#</span>Lista de siglas</h1>
+  <p>API &nbsp;&nbsp; Interface de programação de aplicações</p>
+  <p>CNPJ &nbsp;&nbsp; Cadastro Nacional da Pessoa Jurídica</p>
+  <p>CPF &nbsp;&nbsp; Cadastro de Pessoas Físicas</p>
+  <p>HTTP &nbsp;&nbsp; Protocolo de transferência de hipertexto</p>
+  <p>JSON &nbsp;&nbsp; Notação de objeto JavaScript</p>
+  <p>JWT &nbsp;&nbsp; JSON Web Token</p>
+  <p>REST &nbsp;&nbsp; Transferência de estado representacional</p>
+  <p>SQL &nbsp;&nbsp; Linguagem de consulta estruturada</p>
+</section>
+
+<section class="sheet toc">
+  <h1 class="pre">Sumário</h1>
+  <p class="toc-row pre"><span class="titulo">Resumo</span><span class="pontos"></span><span class="pag">__P_resumo__</span></p>
+  <p class="toc-row pre"><span class="titulo">Lista de ilustrações</span><span class="pontos"></span><span class="pag">__P_listailust__</span></p>
+  <p class="toc-row pre"><span class="titulo">Lista de tabelas</span><span class="pontos"></span><span class="pag">__P_listatab__</span></p>
+  <p class="toc-row pre"><span class="titulo">Lista de siglas</span><span class="pontos"></span><span class="pag">__P_siglas__</span></p>
+  <p class="toc-row primario"><span class="titulo">1 Introdução</span><span class="pontos"></span><span class="pag">__P_sec1__</span></p>
+  <p class="toc-row nivel2"><span class="titulo">1.1 Objetivo</span><span class="pontos"></span><span class="pag">__P_sec11__</span></p>
+  <p class="toc-row nivel2"><span class="titulo">1.2 Delimitação</span><span class="pontos"></span><span class="pag">__P_sec12__</span></p>
+  <p class="toc-row primario"><span class="titulo">2 O sistema QuickStock</span><span class="pontos"></span><span class="pag">__P_sec2__</span></p>
+  <p class="toc-row nivel2"><span class="titulo">2.1 O aplicativo</span><span class="pontos"></span><span class="pag">__P_sec21__</span></p>
+  <p class="toc-row nivel2"><span class="titulo">2.2 API</span><span class="pontos"></span><span class="pag">__P_sec22__</span></p>
+  <p class="toc-row nivel2"><span class="titulo">2.3 A ligação entre os dois</span><span class="pontos"></span><span class="pag">__P_sec23__</span></p>
+  <p class="toc-row primario"><span class="titulo">3 O que já estava pronto</span><span class="pontos"></span><span class="pag">__P_sec3__</span></p>
+  <p class="toc-row nivel2"><span class="titulo">3.1 Organização do código</span><span class="pontos"></span><span class="pag">__P_sec31__</span></p>
+  <p class="toc-row nivel2"><span class="titulo">3.2 Dados já persistidos</span><span class="pontos"></span><span class="pag">__P_sec32__</span></p>
+  <p class="toc-row nivel2"><span class="titulo">3.3 Recursos já expostos</span><span class="pontos"></span><span class="pag">__P_sec33__</span></p>
+  <p class="toc-row nivel2"><span class="titulo">3.4 Autenticação anterior</span><span class="pontos"></span><span class="pag">__P_sec34__</span></p>
+  <p class="toc-row nivel2"><span class="titulo">3.5 Onde a ligação ainda falhava</span><span class="pontos"></span><span class="pag">__P_sec35__</span></p>
+  <p class="toc-row primario"><span class="titulo">4 O que foi alterado</span><span class="pontos"></span><span class="pag">__P_sec4__</span></p>
+  <p class="toc-row nivel2"><span class="titulo">4.1 Perfil de uso no cadastro e no login</span><span class="pontos"></span><span class="pag">__P_sec41__</span></p>
+  <p class="toc-row nivel2"><span class="titulo">4.2 Efeito no marketplace</span><span class="pontos"></span><span class="pag">__P_sec42__</span></p>
+  <p class="toc-row nivel2"><span class="titulo">4.3 Recuperação de senha</span><span class="pontos"></span><span class="pag">__P_sec43__</span></p>
+  <p class="toc-row nivel2"><span class="titulo">4.4 Caminhoneiros e entregas</span><span class="pontos"></span><span class="pag">__P_sec44__</span></p>
+  <p class="toc-row nivel2"><span class="titulo">4.5 Resumo mostrado na tela de logística</span><span class="pontos"></span><span class="pag">__P_sec45__</span></p>
+  <p class="toc-row nivel2"><span class="titulo">4.6 Ajustes correspondentes no aplicativo</span><span class="pontos"></span><span class="pag">__P_sec46__</span></p>
+  <p class="toc-row primario"><span class="titulo">5 Limites desta entrega</span><span class="pontos"></span><span class="pag">__P_sec5__</span></p>
+  <p class="toc-row primario"><span class="titulo">6 Considerações finais</span><span class="pontos"></span><span class="pag">__P_sec6__</span></p>
+  <p class="toc-row primario"><span class="titulo">Referências</span><span class="pontos"></span><span class="pag">__P_ref__</span></p>
+</section>
+
+<h1 class="primeira"><span class="mk">#sec1#</span>1 Introdução</h1>
+
+<p>
+  Operar estoque, compra e quiosque no QuickStock depende de duas partes que precisam concordar sobre os mesmos dados. De um lado está o aplicativo móvel. Do outro, a API que grava usuários, empresas, produtos, pedidos e pagamentos no PostgreSQL. A maior parte dessa conversa já existia. O que faltava era fazer o cadastro, a sessão e a logística obedecerem ao que as telas novas passaram a pedir.
+</p>
+<p>
+  Este relatório foi escrito a partir do código dos dois projetos, no estado de setembro de 2026. Ele separa, de propósito, o que já funcionava do que foi construído na integração. A separação evita tratar rota antiga como novidade e evita descrever como pronto um comportamento que a tela apenas simulava.
+</p>
+
+<h2><span class="mk">#sec11#</span>1.1 Objetivo</h2>
+<p>
+  O objetivo é registrar, em linguagem de quem vai manter o sistema, três resultados. O primeiro é o mapa da API que o aplicativo já usava. O segundo é a persistência do perfil escolhido na abertura da conta, junto com a troca de senha pedida pela tela correspondente. O terceiro é a substituição das listas fixas de caminhoneiro e de logística por recursos HTTP próprios, sempre ligados à empresa da pessoa logada.
+</p>
+
+<h2><span class="mk">#sec12#</span>1.2 Delimitação</h2>
+<p>
+  O texto cobre a API em Spring Boot e os pontos do aplicativo que precisaram mudar para consumi-la. Telas de produto, quiosque, sacola, endereço e pagamento já chamavam a API e não foram reescritas. Também não entra aqui o desenho visual dessas telas. O rastreio descrito na logística é o que a API calcula a partir do status gravado. Não há integração com operadora de transporte, mapa ou mensagem de e-mail.
+</p>
+
+<h1><span class="mk">#sec2#</span>2 O sistema QuickStock</h1>
+
+<p>
+  O QuickStock atende quem vende em quiosque e quem compra de distribuidoras. O mesmo aplicativo muda de conjunto de abas conforme o papel da conta. Cliente percorre exploração, carrinho e pedidos. Fornecedor, e também quem acumula os dois papéis, trabalha com estoque, quiosque, compras e o painel da empresa. Essa escolha de interface só é confiável se o papel vier do servidor, e não de um valor esquecido no aparelho.
+</p>
+
+<h2><span class="mk">#sec21#</span>2.1 O aplicativo</h2>
+<p>
+  O aplicativo está em React Native com Expo e TypeScript. A navegação separa o fluxo de entrada (animação, boas-vindas, escolha de papel, cadastro, login e senha esquecida) do fluxo autenticado. Serviços em <span class="mono">src/services</span> concentram as chamadas HTTP. O endereço base é a porta 8080. No emulador Android o host de desenvolvimento é 10.0.2.2. No aparelho, o host sai do endereço que o Expo informa. No restante dos casos, usa-se localhost.
+</p>
+<p>
+  A sessão guarda o token, o usuário e o instante de expiração. Ao reabrir o aplicativo, a rota <span class="mono">GET /api/usuarios/me</span> confirma o token e devolve o usuário atual. Se a resposta falha, a sessão local é descartada.
+</p>
+
+<h2><span class="mk">#sec22#</span>2.2 API</h2>
+<p>
+  A API usa Java 17 e Spring Boot 3.4. A persistência é Spring Data JPA com Hibernate, dialeto PostgreSQL, e o esquema é atualizado na subida (<span class="mono">ddl-auto=update</span>). O script <span class="mono">data.sql</span> roda em seguida e aplica ajustes idempotentes: colunas que ainda não existem, cargas de demonstração e correções que podem ser repetidas sem duplicar linha. A senha é armazenada com BCrypt. O token de sessão é um JWT (JSON Web Token), com validade de 24 horas, definida em <span class="mono">jwt.expiration-ms</span>. A documentação interativa fica em <span class="mono">/swagger</span>.
+</p>
+<p>
+  O código segue camadas. O controller recebe HTTP e devolve JSON. O service concentra a regra. O repository fala com o banco. Entidade é o que se persiste. DTO é o que atravessa a fronteira HTTP, para não expor o hash da senha nem detalhes internos da tabela. A Figura 1 mostra essa divisão e o lugar do aplicativo.
+</p>
+
+<figure>
+  <svg viewBox="0 0 680 430" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Camadas da API">
+    <rect x="170" y="12" width="340" height="52" fill="#fff" stroke="#000" stroke-width="1.4"/>
+    <text x="340" y="34" text-anchor="middle" font-family="Times New Roman, serif" font-size="15">Aplicativo móvel (Expo)</text>
+    <text x="340" y="52" text-anchor="middle" font-family="Times New Roman, serif" font-size="13">HTTP e JSON na porta 8080</text>
+    <line x1="340" y1="64" x2="340" y2="88" stroke="#000" stroke-width="1.2"/>
+    <polygon points="334,88 346,88 340,98" fill="#000"/>
+    <rect x="140" y="102" width="400" height="46" fill="#f4f4f4" stroke="#000" stroke-width="1.4"/>
+    <text x="340" y="130" text-anchor="middle" font-family="Times New Roman, serif" font-size="15">Controller — rotas /api</text>
+    <line x1="340" y1="148" x2="340" y2="168" stroke="#000" stroke-width="1.2"/>
+    <polygon points="334,168 346,168 340,178" fill="#000"/>
+    <rect x="140" y="182" width="400" height="46" fill="#f4f4f4" stroke="#000" stroke-width="1.4"/>
+    <text x="340" y="210" text-anchor="middle" font-family="Times New Roman, serif" font-size="15">Service — regra de negócio</text>
+    <line x1="340" y1="228" x2="340" y2="248" stroke="#000" stroke-width="1.2"/>
+    <polygon points="334,248 346,248 340,258" fill="#000"/>
+    <rect x="140" y="262" width="400" height="46" fill="#f4f4f4" stroke="#000" stroke-width="1.4"/>
+    <text x="340" y="290" text-anchor="middle" font-family="Times New Roman, serif" font-size="15">Repository — Spring Data JPA</text>
+    <line x1="340" y1="308" x2="340" y2="328" stroke="#000" stroke-width="1.2"/>
+    <polygon points="334,328 346,328 340,338" fill="#000"/>
+    <rect x="170" y="342" width="340" height="52" fill="#fff" stroke="#000" stroke-width="1.4"/>
+    <text x="340" y="364" text-anchor="middle" font-family="Times New Roman, serif" font-size="15">PostgreSQL — base quickstock</text>
+    <text x="340" y="382" text-anchor="middle" font-family="Times New Roman, serif" font-size="13">localhost, porta 5432</text>
+  </svg>
+  <figcaption><span class="mk">#fig1#</span>Figura 1 – Camadas da API e o ponto em que o aplicativo entra</figcaption>
+  <p class="fonte">Fonte: Elaborada pelos autores (2026).</p>
+</figure>
+
+<h2><span class="mk">#sec23#</span>2.3 A ligação entre os dois</h2>
+<p>
+  Cada tela que precisa de dado remoto chama um serviço. O serviço monta a URL, envia JSON quando há corpo e lê o campo <span class="mono">erro</span> quando a resposta não é de sucesso. Não há um gateway separado: o aplicativo fala direto com a API. Imagem de produto gravada em disco é devolvida como caminho e o aplicativo prefixa o mesmo host da API.
+</p>
+<p>
+  Dois conceitos de “perfil” convivem e não devem ser misturados. O perfil administrativo (<span class="mono">perfis</span>, hoje o registro Admin) é o papel interno da conta dentro da empresa e continua sendo atribuído no cadastro público. O perfil de uso é outra informação: cliente, fornecedor ou os dois. É ele que decide as abas. Antes da integração, só o primeiro era gravado no banco.
+</p>
+
+<h1><span class="mk">#sec3#</span>3 O que já estava pronto</h1>
+
+<h2><span class="mk">#sec31#</span>3.1 Organização do código</h2>
+<p>
+  O pacote <span class="mono">com.quickstock.backend</span> já reunia config, controller, dto, entity, exception, repository e service. Erros de validação e de regra de cadastro saem num JSON com a chave <span class="mono">erro</span>, no formato que o aplicativo já sabe mostrar. Os controllers declaram CORS aberto, o que permite o Expo Web chamar a API a partir de outra origem. No aplicativo nativo essa liberação não é exigida pelo aparelho, mas não atrapalha.
+</p>
+<p>
+  A subida da aplicação cria ou ajusta tabelas e, depois, executa <span class="mono">data.sql</span>. Esse script já inseria o perfil Admin, colunas de estoque e de pedido, cartões salvos e três distribuidoras de demonstração: Casa dos Vinhos, Cervejaria Caruaru e Whisky Labs, com produtos e imagens.
+</p>
+
+<h2><span class="mk">#sec32#</span>3.2 Dados já persistidos</h2>
+<p>
+  As entidades anteriores à logística cobrem o núcleo operacional. Empresa guarda nome, CNPJ, telefone, tipo, descrição e imagens. Usuário guarda nome, e-mail único, hash da senha, perfil administrativo, empresa e a flag de ativo. Produto pertence a uma empresa e tem preço, unidade, estoque, código e imagem. Barraca (o quiosque na interface) liga um evento a um responsável e a itens de estoque. Pedido, item de pedido e pagamento registram a venda. Solicitação de compra, com seus itens, é o pedido feito a uma distribuidora. Endereço de entrega, forma de pagamento salva e cartão salvo (sem o código de segurança) completam o checkout. Evento organiza as barracas.
+</p>
+<p>
+  O campo <span class="mono">tipo</span> da empresa já distinguia, entre outros valores, COMPRADOR e DISTRIBUIDOR. O marketplace listava somente DISTRIBUIDOR. Uma empresa cadastrada pela tela pública nascia com o valor padrão COMPRADOR e, por isso, não aparecia como fornecedora, mesmo quando a pessoa tinha se declarado fornecedora no aplicativo.
+</p>
+
+<h2><span class="mk">#sec33#</span>3.3 Recursos já expostos</h2>
+<p>
+  A Tabela 1 reúne os recursos que as telas já chamavam antes desta integração. A lista não é o catálogo inteiro da API: há também eventos, pagamentos avulsos, itens de pedido e perfis administrativos, usados pela própria API e por cargas internas. O recorte abaixo é o contrato que o aplicativo já dependia.
+</p>
+
+<div class="bloco">
+<table>
+  <caption><span class="mk">#tab1#</span>Tabela 1 – Recursos que o aplicativo já consumia</caption>
+  <thead>
+    <tr>
+      <th class="rota">Recurso</th>
+      <th>Uso no aplicativo</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td class="rota">POST /api/cadastro</td><td>Abertura de conta, com empresa e usuário no mesmo corpo.</td></tr>
+    <tr><td class="rota">POST /api/usuarios/login</td><td>E-mail, senha e devolução do token com o usuário.</td></tr>
+    <tr><td class="rota">GET /api/usuarios/me</td><td>Reidratação da sessão a partir do token.</td></tr>
+    <tr><td class="rota">PUT /api/usuarios/{id}</td><td>Nome, e-mail e senha nas configurações.</td></tr>
+    <tr><td class="rota">PUT /api/empresas/{id}</td><td>Nome, CNPJ e telefone da empresa.</td></tr>
+    <tr><td class="rota">/api/produtos</td><td>Listagem, detalhe, inclusão, edição, exclusão e upload de imagem.</td></tr>
+    <tr><td class="rota">/api/barracas</td><td>Quiosques da empresa, estoque e desativação.</td></tr>
+    <tr><td class="rota">/api/marketplace</td><td>Fornecedores e o catálogo de cada um.</td></tr>
+    <tr><td class="rota">/api/solicitacoes-compra</td><td>Pedido de compra e consulta do andamento.</td></tr>
+    <tr><td class="rota">/api/enderecos</td><td>Endereços da empresa e consulta de CEP.</td></tr>
+    <tr><td class="rota">/api/formas-pagamento</td><td>PIX, crédito, débito e dinheiro salvos na empresa.</td></tr>
+    <tr><td class="rota">/api/cartoes-pagamento</td><td>Cartões de crédito e débito, sem armazenar o CVV.</td></tr>
+    <tr><td class="rota">/api/financeiro</td><td>Resumo e movimento do dia no painel.</td></tr>
+    <tr><td class="rota">/api/notificacoes</td><td>Avisos da empresa compradora.</td></tr>
+  </tbody>
+</table>
+<p class="fonte">Fonte: Elaborada pelos autores (2026), a partir dos serviços do aplicativo e dos controllers da API.</p>
+</div>
+
+<h2><span class="mk">#sec34#</span>3.4 Autenticação anterior</h2>
+<p>
+  O login comparava o e-mail informado com o registro, exigia usuário ativo e conferia a senha com BCrypt. Em caso de acerto, a API emitia o JWT e devolvia também o usuário, já no DTO, sem o hash. O cadastro público criava a empresa, localizava o perfil Admin (ou Gestor, ou Gerente, se o nome Admin não existisse) e gravava o usuário ligado aos dois. E-mail repetido respondia 409. CNPJ repetido também.
+</p>
+<p>
+  Havia ainda, só no aplicativo, um desvio: e-mail <span class="mono">admin</span> e senha <span class="mono">1234</span> montavam uma sessão falsa, com token que a API não reconhece e com uma empresa inventada no cliente. Esse caminho não lia nem gravava nada no PostgreSQL. Quem testava por ele via abas de cliente e fornecedor ao mesmo tempo, sem que essa combinação existisse no banco.
+</p>
+
+<h2><span class="mk">#sec35#</span>3.5 Onde a ligação ainda falhava</h2>
+<p>
+  Três furos impediam tratar o conjunto como um sistema só. O primeiro era o perfil de uso. A tela anterior ao formulário pergunta se a pessoa é cliente, fornecedora ou as duas coisas. O formulário mudava os campos (CPF e telefone para cliente; empresa e CNPJ para fornecedor; os dois blocos quando a pessoa acumula os papéis). Na hora de enviar, porém, o corpo não levava essa escolha. A API ignoraria o campo se ele viesse, porque o DTO de cadastro não o declarava. O aplicativo então salvava a escolha no armazenamento local, indexada pelo e-mail. Trocar de aparelho, limpar os dados ou entrar numa instalação nova fazia a conta cair na interface de empresa, que é o ramo usado quando o perfil local não é “Cliente”.
+</p>
+<p>
+  O segundo furo era a senha. A tela “esqueceu a senha” envia e-mail e a nova senha para <span class="mono">POST /api/usuarios/recuperar-senha</span>. Essa rota não existia. A chamada terminava em erro e a senha no banco permanecia a antiga.
+</p>
+<p>
+  O terceiro furo era a logística. As telas de caminhoneiros, de cadastro e de envio estavam na navegação e no atalho da home da empresa, mas os nomes, rotas e a linha do tempo (“em trânsito”, pedido 1049, motorista Rafael) eram constantes no código da tela. Cadastrar um motorista só alterava o estado daquela visita. Ao sair e voltar, a lista fixa reaparecia.
+</p>
+
+<h1><span class="mk">#sec4#</span>4 O que foi alterado</h1>
+
+<p>
+  A integração não substituiu a API. Ela fechou os três furos da seção anterior e fez o marketplace enxergar fornecedor cadastrado pela própria tela. Contas antigas não foram reclassificadas: quem já estava como COMPRADOR continua comprador. O script apenas preenche <span class="mono">perfil_uso</span> com Fornecedor quando a coluna está vazia, para a interface não ficar sem papel.
+</p>
+
+<h2><span class="mk">#sec41#</span>4.1 Perfil de uso no cadastro e no login</h2>
+<p>
+  A tabela <span class="mono">usuarios</span> ganhou <span class="mono">perfil_uso</span> (Cliente, Fornecedor ou ClienteFornecedor) e <span class="mono">cpf</span>, opcional, com até 14 caracteres. O <span class="mono">data.sql</span> cria as colunas se elas ainda não existirem e preenche o perfil das linhas antigas. O cadastro passou a exigir, no corpo, o campo <span class="mono">perfil</span>. Valor ausente é tratado como Fornecedor, para não quebrar um cliente antigo da API. Valor fora da lista responde 400, com a mensagem de perfil inválido.
+</p>
+<p>
+  O mesmo cadastro define <span class="mono">empresa.tipo</span> a partir do perfil, conforme a Tabela 2. O perfil administrativo da linha de usuário continua sendo Admin. São colunas diferentes, com funções diferentes. O CPF informado no usuário é guardado só com dígitos. Se o documento da empresa já existir, a mensagem fala em CPF quando há 11 dígitos e em CNPJ nos demais casos. Isso cobre o cliente, que envia o CPF no lugar do CNPJ da empresa, porque a conta ainda precisa de uma empresa para o restante da API, que é toda organizada por <span class="mono">empresaId</span>.
+</p>
+
+<div class="bloco">
+<table>
+  <caption><span class="mk">#tab2#</span>Tabela 2 – Perfil de uso e tipo da empresa</caption>
+  <thead>
+    <tr>
+      <th>Escolha na tela</th>
+      <th>perfil_uso</th>
+      <th>empresa.tipo</th>
+      <th>Aparece como fornecedor</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td>Sou cliente</td><td>Cliente</td><td>CLIENTE</td><td>Não</td></tr>
+    <tr><td>Sou fornecedor</td><td>Fornecedor</td><td>DISTRIBUIDOR</td><td>Sim</td></tr>
+    <tr><td>Cliente e fornecedor</td><td>ClienteFornecedor</td><td>AMBOS</td><td>Sim</td></tr>
+  </tbody>
+</table>
+<p class="fonte">Fonte: Elaborada pelos autores (2026).</p>
+</div>
+
+<figure>
+  <svg viewBox="0 0 680 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Mapeamento de perfil">
+    <rect x="20" y="110" width="150" height="70" fill="#fff" stroke="#000" stroke-width="1.4"/>
+    <text x="95" y="140" text-anchor="middle" font-family="Times New Roman, serif" font-size="14">Tela de escolha</text>
+    <text x="95" y="160" text-anchor="middle" font-family="Times New Roman, serif" font-size="13">três opções</text>
+    <line x1="170" y1="145" x2="210" y2="145" stroke="#000"/>
+    <polygon points="210,140 220,145 210,150" fill="#000"/>
+    <rect x="220" y="20" width="200" height="52" fill="#f4f4f4" stroke="#000"/>
+    <text x="320" y="50" text-anchor="middle" font-family="Times New Roman, serif" font-size="14">Cliente → CLIENTE</text>
+    <rect x="220" y="118" width="200" height="52" fill="#f4f4f4" stroke="#000"/>
+    <text x="320" y="148" text-anchor="middle" font-family="Times New Roman, serif" font-size="14">Fornecedor → DISTRIBUIDOR</text>
+    <rect x="220" y="216" width="230" height="52" fill="#f4f4f4" stroke="#000"/>
+    <text x="335" y="246" text-anchor="middle" font-family="Times New Roman, serif" font-size="14">Ambos → AMBOS</text>
+    <line x1="95" y1="110" x2="95" y2="46" stroke="#000"/>
+    <line x1="95" y1="46" x2="220" y2="46" stroke="#000"/>
+    <polygon points="210,41 220,46 210,51" fill="#000"/>
+    <line x1="95" y1="180" x2="95" y2="242" stroke="#000"/>
+    <line x1="95" y1="242" x2="220" y2="242" stroke="#000"/>
+    <polygon points="210,237 220,242 210,247" fill="#000"/>
+    <line x1="420" y1="46" x2="470" y2="46" stroke="#000"/>
+    <line x1="470" y1="46" x2="470" y2="144" stroke="#000"/>
+    <line x1="420" y1="144" x2="500" y2="144" stroke="#000"/>
+    <line x1="450" y1="242" x2="470" y2="242" stroke="#000"/>
+    <line x1="470" y1="242" x2="470" y2="168" stroke="#000"/>
+    <polygon points="490,139 500,144 490,149" fill="#000"/>
+    <rect x="500" y="112" width="160" height="64" fill="#fff" stroke="#000" stroke-width="1.4"/>
+    <text x="580" y="138" text-anchor="middle" font-family="Times New Roman, serif" font-size="14">Login devolve</text>
+    <text x="580" y="158" text-anchor="middle" font-family="Times New Roman, serif" font-size="14">perfilUso</text>
+  </svg>
+  <figcaption><span class="mk">#fig2#</span>Figura 2 – Perfil escolhido no cadastro e tipo gravado na empresa</figcaption>
+  <p class="fonte">Fonte: Elaborada pelos autores (2026).</p>
+</figure>
+
+<p>
+  A resposta de usuário, usada no cadastro, no login e em <span class="mono">/me</span>, passou a incluir <span class="mono">perfilUso</span>. Se a coluna estiver vazia numa linha antiga, a resposta assume Fornecedor. Login e recuperação de senha localizam o e-mail sem diferenciar maiúsculas de minúsculas. A rota <span class="mono">/me</span> continua achando a pessoa pelo identificador que está dentro do token; o que mudou nela é o conteúdo da resposta, não a forma de busca.
+</p>
+<p>
+  No aplicativo, o cadastro envia <span class="mono">perfil</span> junto com empresa e usuário. Depois do login, o contexto de autenticação lê <span class="mono">perfilUso</span> do usuário devolvido. O armazenamento local permanece apenas como reserva, para uma resposta antiga que ainda não traga o campo. O desvio <span class="mono">admin</span> / <span class="mono">1234</span> foi retirado: entrar no sistema exige uma conta real.
+</p>
+
+<figure>
+  <svg viewBox="0 0 680 250" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Fluxo de cadastro e login">
+    <rect x="16" y="90" width="140" height="58" fill="#fff" stroke="#000" stroke-width="1.3"/>
+    <text x="86" y="114" text-anchor="middle" font-family="Times New Roman, serif" font-size="14">Escolha</text>
+    <text x="86" y="132" text-anchor="middle" font-family="Times New Roman, serif" font-size="14">e formulário</text>
+    <line x1="156" y1="119" x2="188" y2="119" stroke="#000"/>
+    <polygon points="188,114 198,119 188,124" fill="#000"/>
+    <rect x="198" y="78" width="150" height="82" fill="#f4f4f4" stroke="#000" stroke-width="1.3"/>
+    <text x="273" y="108" text-anchor="middle" font-family="Times New Roman, serif" font-size="14">POST /api/cadastro</text>
+    <text x="273" y="128" text-anchor="middle" font-family="Times New Roman, serif" font-size="13">grava perfil e tipo</text>
+    <text x="273" y="146" text-anchor="middle" font-family="Times New Roman, serif" font-size="13">responde 201</text>
+    <line x1="348" y1="119" x2="380" y2="119" stroke="#000"/>
+    <polygon points="380,114 390,119 380,124" fill="#000"/>
+    <rect x="390" y="78" width="140" height="82" fill="#f4f4f4" stroke="#000" stroke-width="1.3"/>
+    <text x="460" y="112" text-anchor="middle" font-family="Times New Roman, serif" font-size="14">POST login</text>
+    <text x="460" y="132" text-anchor="middle" font-family="Times New Roman, serif" font-size="13">token JWT</text>
+    <text x="460" y="150" text-anchor="middle" font-family="Times New Roman, serif" font-size="13">e perfilUso</text>
+    <line x1="530" y1="119" x2="552" y2="119" stroke="#000"/>
+    <polygon points="552,114 562,119 552,124" fill="#000"/>
+    <rect x="562" y="78" width="102" height="82" fill="#fff" stroke="#000" stroke-width="1.3"/>
+    <text x="613" y="112" text-anchor="middle" font-family="Times New Roman, serif" font-size="14">Abas</text>
+    <text x="613" y="132" text-anchor="middle" font-family="Times New Roman, serif" font-size="13">cliente ou</text>
+    <text x="613" y="150" text-anchor="middle" font-family="Times New Roman, serif" font-size="13">empresa</text>
+  </svg>
+  <figcaption><span class="mk">#fig3#</span>Figura 3 – Caminho do cadastro até as abas do aplicativo</figcaption>
+  <p class="fonte">Fonte: Elaborada pelos autores (2026).</p>
+</figure>
+
+<h2><span class="mk">#sec42#</span>4.2 Efeito no marketplace</h2>
+<p>
+  Listar fornecedores, abrir o catálogo de um fornecedor, aceitar uma solicitação de compra e montar notificações de destaque usavam a lista fixa que continha só DISTRIBUIDOR. Com a Tabela 2, a pessoa que se cadastra como fornecedora já nasce nesse tipo e passa a aparecer. Quem marca os dois papéis nasce como AMBOS. Esses três pontos da API passaram a aceitar DISTRIBUIDOR e AMBOS. CLIENTE fica de fora da vitrine, porque essa conta compra e não oferece catálogo de distribuidora.
+</p>
+<p>
+  As cargas de demonstração que procuram as distribuidoras parceiras continuam filtrando DISTRIBUIDOR. Elas não foram alargadas para AMBOS, para não misturar conta recém-criada com o catálogo de vitrine que o script semeia na Casa dos Vinhos, na Cervejaria Caruaru e na Whisky Labs.
+</p>
+
+<h2><span class="mk">#sec43#</span>4.3 Recuperação de senha</h2>
+<p>
+  <span class="mono">POST /api/usuarios/recuperar-senha</span> recebe <span class="mono">email</span> e <span class="mono">novaSenha</span>. E-mail em branco responde 400. Senha com menos de seis caracteres responde 400. E-mail que não existe responde 404, com <span class="mono">erro</span> igual a “E-mail não encontrado.”. Quando o e-mail existe, a API gera um hash BCrypt novo, grava em <span class="mono">senha_hash</span> e responde 200 com a mensagem de senha atualizada. A tela que já existia no aplicativo não precisou de contrato novo: ela já enviava esse JSON.
+</p>
+<p>
+  A troca é imediata. Não há código enviado por e-mail nem prazo de validade do link, porque a tela pede a nova senha no próprio formulário. Quem conhece um e-mail cadastrado e alcança a API consegue definir outra senha. Esse limite está registrado na seção 5, para não ser lido como confirmação de identidade.
+</p>
+
+<h2><span class="mk">#sec44#</span>4.4 Caminhoneiros e entregas</h2>
+<p>
+  Duas tabelas novas guardam a operação de entrega da empresa logada. <span class="mono">caminhoneiros</span> tem empresa, nome, veículo, rota, status e data de criação. O status previsto na listagem é Em rota, Carregando, Disponível ou Atrasado. <span class="mono">entregas_logistica</span> pertence a um caminhoneiro e tem nome do cliente, cidade, rota, status e data de criação. O status da entrega é Em rota, Carregando ou Entregue.
+</p>
+<p>
+  <span class="mono">GET /api/caminhoneiros?empresaId=</span> devolve a lista da empresa, da mais recente para a mais antiga, cada item com as entregas e com a lista de nomes de cliente usada no cartão da tela. Sem <span class="mono">empresaId</span>, a resposta é uma lista vazia. <span class="mono">POST /api/caminhoneiros</span> exige empresa, nome, veículo e rota. A empresa inexistente responde 400. Se o corpo traz entrega com nome de cliente, o caminhoneiro nasce Carregando e a entrega também, com a rota do motorista. Cidade em branco vira “Local não informado”. Sem nome de cliente, o caminhoneiro nasce Disponível e sem entregas.
+</p>
+
+<figure>
+  <svg viewBox="0 0 680 230" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Relacionamento empresa caminhoneiro entrega">
+    <rect x="20" y="60" width="170" height="110" fill="#fff" stroke="#000" stroke-width="1.4"/>
+    <text x="105" y="86" text-anchor="middle" font-family="Times New Roman, serif" font-size="15" font-weight="bold">Empresa</text>
+    <text x="105" y="112" text-anchor="middle" font-family="Times New Roman, serif" font-size="13">id</text>
+    <text x="105" y="132" text-anchor="middle" font-family="Times New Roman, serif" font-size="13">nome, tipo</text>
+    <text x="105" y="152" text-anchor="middle" font-family="Times New Roman, serif" font-size="13">cnpj</text>
+    <line x1="190" y1="115" x2="250" y2="115" stroke="#000" stroke-width="1.2"/>
+    <text x="220" y="106" text-anchor="middle" font-family="Times New Roman, serif" font-size="13">1</text>
+    <text x="236" y="136" text-anchor="middle" font-family="Times New Roman, serif" font-size="13">N</text>
+    <polygon points="240,110 250,115 240,120" fill="#000"/>
+    <rect x="250" y="48" width="190" height="134" fill="#f4f4f4" stroke="#000" stroke-width="1.4"/>
+    <text x="345" y="74" text-anchor="middle" font-family="Times New Roman, serif" font-size="15" font-weight="bold">Caminhoneiro</text>
+    <text x="345" y="100" text-anchor="middle" font-family="Times New Roman, serif" font-size="13">nome, veículo, rota</text>
+    <text x="345" y="120" text-anchor="middle" font-family="Times New Roman, serif" font-size="13">status</text>
+    <text x="345" y="140" text-anchor="middle" font-family="Times New Roman, serif" font-size="13">empresa_id</text>
+    <text x="345" y="160" text-anchor="middle" font-family="Times New Roman, serif" font-size="13">criado_em</text>
+    <line x1="440" y1="115" x2="490" y2="115" stroke="#000" stroke-width="1.2"/>
+    <text x="458" y="106" text-anchor="middle" font-family="Times New Roman, serif" font-size="13">1</text>
+    <text x="474" y="136" text-anchor="middle" font-family="Times New Roman, serif" font-size="13">N</text>
+    <polygon points="480,110 490,115 480,120" fill="#000"/>
+    <rect x="490" y="48" width="170" height="134" fill="#fff" stroke="#000" stroke-width="1.4"/>
+    <text x="575" y="74" text-anchor="middle" font-family="Times New Roman, serif" font-size="15" font-weight="bold">Entrega</text>
+    <text x="575" y="100" text-anchor="middle" font-family="Times New Roman, serif" font-size="13">nome do cliente</text>
+    <text x="575" y="120" text-anchor="middle" font-family="Times New Roman, serif" font-size="13">cidade, rota</text>
+    <text x="575" y="140" text-anchor="middle" font-family="Times New Roman, serif" font-size="13">status</text>
+    <text x="575" y="160" text-anchor="middle" font-family="Times New Roman, serif" font-size="13">criado_em</text>
+  </svg>
+  <figcaption><span class="mk">#fig4#</span>Figura 4 – Empresa, caminhoneiro e entrega</figcaption>
+  <p class="fonte">Fonte: Elaborada pelos autores (2026).</p>
+</figure>
+
+<h2><span class="mk">#sec45#</span>4.5 Resumo mostrado na tela de logística</h2>
+<p>
+  <span class="mono">GET /api/logistica?empresaId=</span> escolhe a entrega que a tela deve contar. Primeiro busca entregas da empresa cujo status não é Entregue e fica com a de maior identificador. Se não houver entrega em aberto, usa a entrega mais recente, inclusive a já concluída. Se não houver nenhuma, a resposta vem com <span class="mono">vazio</span> verdadeiro e a lista de etapas vazia. A tela, nesse caso, mostra “Sem entregas” em vez da linha do tempo fixa que existia antes. Empresa inexistente responde 400.
+</p>
+<p>
+  Quando há entrega, a API monta cinco etapas com horário a partir de <span class="mono">criado_em</span>: pedido confirmado no instante da gravação, separação 30 minutos depois, carregamento aos 65 minutos, trânsito aos 135 e entrega prevista aos 230. Quantas delas aparecem concluídas depende do status, como na Tabela 4. O número mostrado no cartão “Pedido” é o identificador da entrega, no formato <span class="mono">#</span> seguido do id. Não é o número de uma solicitação de compra do marketplace. O tempo “2h 15min” é o texto fixo do estado em trânsito, não um cálculo de rota.
+</p>
+
+<div class="bloco">
+<table>
+  <caption><span class="mk">#tab4#</span>Tabela 4 – Status da entrega e texto mostrado na tela</caption>
+  <thead>
+    <tr>
+      <th>Status da entrega</th>
+      <th>Etapas concluídas</th>
+      <th>Texto do status</th>
+      <th>Tempo estimado</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td>Carregando (e os demais não listados)</td><td>As duas primeiras</td><td>Em separação</td><td>Aguardando carregamento</td></tr>
+    <tr><td>Em rota</td><td>As quatro primeiras</td><td>Em trânsito</td><td>2h 15min</td></tr>
+    <tr><td>Em rota, com caminhoneiro Atrasado</td><td>As quatro primeiras</td><td>Atrasado</td><td>Atraso na rota</td></tr>
+    <tr><td>Entregue</td><td>As cinco</td><td>Entregue</td><td>Concluída</td></tr>
+  </tbody>
+</table>
+<p class="fonte">Fonte: Elaborada pelos autores (2026), a partir de LogisticaService.</p>
+</div>
+
+<figure>
+  <svg viewBox="0 0 680 150" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Etapas da logística">
+    <line x1="50" y1="48" x2="630" y2="48" stroke="#000" stroke-width="1.4"/>
+    <circle cx="50" cy="48" r="7" fill="#000"/>
+    <circle cx="195" cy="48" r="7" fill="#000"/>
+    <circle cx="340" cy="48" r="7" fill="#fff" stroke="#000" stroke-width="1.6"/>
+    <circle cx="485" cy="48" r="7" fill="#fff" stroke="#000" stroke-width="1.6"/>
+    <circle cx="630" cy="48" r="7" fill="#fff" stroke="#000" stroke-width="1.6"/>
+    <text x="50" y="78" text-anchor="middle" font-family="Times New Roman, serif" font-size="12">Pedido</text>
+    <text x="50" y="94" text-anchor="middle" font-family="Times New Roman, serif" font-size="12">confirmado</text>
+    <text x="195" y="78" text-anchor="middle" font-family="Times New Roman, serif" font-size="12">Separação</text>
+    <text x="195" y="94" text-anchor="middle" font-family="Times New Roman, serif" font-size="12">no estoque</text>
+    <text x="340" y="78" text-anchor="middle" font-family="Times New Roman, serif" font-size="12">Carregamento</text>
+    <text x="485" y="78" text-anchor="middle" font-family="Times New Roman, serif" font-size="12">Em trânsito</text>
+    <text x="630" y="78" text-anchor="middle" font-family="Times New Roman, serif" font-size="12">Entrega</text>
+    <text x="630" y="94" text-anchor="middle" font-family="Times New Roman, serif" font-size="12">prevista</text>
+    <text x="340" y="128" text-anchor="middle" font-family="Times New Roman, serif" font-size="13">Exemplo com entrega em Carregando: só os dois primeiros marcos estão concluídos.</text>
+  </svg>
+  <figcaption><span class="mk">#fig5#</span>Figura 5 – Etapas montadas para a tela de logística</figcaption>
+  <p class="fonte">Fonte: Elaborada pelos autores (2026).</p>
+</figure>
+
+<p>
+  O cadastro feito pela tela cria a entrega em Carregando. Os status Em rota, Entregue e Atrasado existem no modelo e na leitura, para a linha do tempo e para o selo da lista. A tela de cadastro ainda não oferece um controle para avançar esses status. Quem for operar o andamento completo precisará de uma atualização posterior, ou de gravar o status por outro cliente da API. Isso também está entre os limites da seção 5.
+</p>
+
+<h2><span class="mk">#sec46#</span>4.6 Ajustes correspondentes no aplicativo</h2>
+<p>
+  Um serviço novo, <span class="mono">logisticaService.ts</span>, lista caminhoneiros, cria o registro e busca o resumo. As três telas deixaram de usar vetores constantes. Elas leem <span class="mono">user.empresa.id</span> da sessão, recarregam ao ganhar foco e tratam lista vazia, falha de rede e ausência de empresa. O contador de motoristas ativos passou a ser o tamanho da lista devolvida, não o número 18 que estava escrito na tela. A Tabela 3 fecha o contrato acrescentado.
+</p>
+
+<div class="bloco">
+<table>
+  <caption><span class="mk">#tab3#</span>Tabela 3 – Rotas acrescentadas nesta integração</caption>
+  <thead>
+    <tr>
+      <th class="rota">Rota</th>
+      <th>Função</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td class="rota">POST /api/usuarios/recuperar-senha</td><td>Troca o hash da senha do e-mail informado.</td></tr>
+    <tr><td class="rota">GET /api/caminhoneiros?empresaId=</td><td>Lista motoristas e entregas da empresa.</td></tr>
+    <tr><td class="rota">POST /api/caminhoneiros</td><td>Cria motorista e, se houver cliente, a primeira entrega.</td></tr>
+    <tr><td class="rota">GET /api/logistica?empresaId=</td><td>Resume a entrega ativa, ou informa que não há entrega.</td></tr>
+  </tbody>
+</table>
+<p class="fonte">Fonte: Elaborada pelos autores (2026).</p>
+</div>
+
+<p>
+  O cadastro público existente, <span class="mono">POST /api/cadastro</span>, não mudou de endereço. Mudou o corpo aceito e o efeito colateral na empresa. O login também manteve o endereço e passou a devolver <span class="mono">perfilUso</span> dentro de <span class="mono">usuario</span>.
+</p>
+
+<h1><span class="mk">#sec5#</span>5 Limites desta entrega</h1>
+
+<p>
+  Conta criada antes da coluna <span class="mono">perfil_uso</span> recebe Fornecedor na migração e mantém o tipo de empresa que já tinha. Se esse tipo for COMPRADOR, a pessoa vê a interface de empresa, mas não entra na vitrine como distribuidora. Só o cadastro novo aplica a Tabela 2.
+</p>
+<p>
+  A recuperação de senha não prova que quem envia o formulário controla a caixa de e-mail. Ela atende o desenho atual da tela, que coleta a nova senha na hora. Um fluxo com mensagem e token de uso único seria outra entrega.
+</p>
+<p>
+  A linha do tempo não observa GPS nem pedido do marketplace. Os horários são deslocamentos fixos sobre a data de criação da entrega, e o “pedido” exibido é o id dessa entrega. O status Atrasado só altera o texto quando a entrega já está Em rota; o formulário do aplicativo não grava essa transição.
+</p>
+<p>
+  As demais telas continuam como estavam. Produto, quiosque, sacola, endereço, cartão e financeiro não foram reabertos nesta integração, porque já tinham rota correspondente.
+</p>
+
+<h1><span class="mk">#sec6#</span>6 Considerações finais</h1>
+
+<p>
+  O aplicativo e a API já formavam um sistema na maior parte do fluxo comercial. A falha estava no que a interface decidia sozinha: o papel da conta, a senha esquecida e a logística de demonstração. Com o perfil gravado no usuário, o tipo da empresa alinhado a esse perfil e as três rotas novas, essas telas passam a ler e gravar o mesmo PostgreSQL que o restante do QuickStock.
+</p>
+<p>
+  Para ver as rotas novas, a API precisa ser reiniciada depois da atualização do código, de modo que o Hibernate crie <span class="mono">caminhoneiros</span> e <span class="mono">entregas_logistica</span> e o script preencha <span class="mono">perfil_uso</span> nas contas já existentes. O login de teste que não consultava o banco não faz mais parte do aplicativo.
+</p>
+
+<h1><span class="mk">#ref#</span>Referências</h1>
+
+<div class="ref">
+  <p>EXPO. <strong>Expo documentation</strong>. Disponível em: https://docs.expo.dev/. Acesso em: 27 set. 2026.</p>
+  <p>FIELDING, R. T. <strong>Architectural styles and the design of network-based software architectures</strong>. 2000. Tese (Doutorado em Ciência da Informação e Computação) – University of California, Irvine, 2000. O capítulo 5 define o estilo REST usado pela API do QuickStock.</p>
+  <p>JONES, M.; BRADLEY, J.; SAKIMURA, N. <strong>RFC 7519</strong>: JSON Web Token (JWT). Fremont: IETF, 2015. Disponível em: https://www.rfc-editor.org/rfc/rfc7519. Acesso em: 27 set. 2026.</p>
+  <p>ORACLE. <strong>Java SE 17 documentation</strong>. Disponível em: https://docs.oracle.com/en/java/javase/17/. Acesso em: 27 set. 2026.</p>
+  <p>POSTGRESQL GLOBAL DEVELOPMENT GROUP. <strong>PostgreSQL documentation</strong>. Disponível em: https://www.postgresql.org/docs/. Acesso em: 27 set. 2026.</p>
+  <p>SPRING. <strong>Spring Boot 3.4 reference documentation</strong>. Disponível em: https://docs.spring.io/spring-boot/docs/3.4.0/reference/html/. Acesso em: 27 set. 2026.</p>
+  <p>SPRING. <strong>Spring Data JPA reference documentation</strong>. Disponível em: https://docs.spring.io/spring-data/jpa/reference/. Acesso em: 27 set. 2026.</p>
+</div>
+
+</body>
+</html>

@@ -20,4 +20,7 @@ public class UsuarioRequestDTO {
     @NotBlank(message = "Senha é obrigatória.")
     @Size(min = 6, max = 100, message = "Senha deve ter entre 6 e 100 caracteres.")
     private String senha;
+
+    @Size(max = 14)
+    private String cpf;
 }

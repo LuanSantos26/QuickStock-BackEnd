@@ -15,11 +15,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class CadastroService {
 
     private static final List<String> PERFIS_ADMIN = List.of("Admin", "Gestor", "Gerente");
+    private static final Set<String> PERFIS_USO = Set.of("Cliente", "Fornecedor", "ClienteFornecedor");
 
     @Autowired private EmpresaRepository empresaRepository;
     @Autowired private UsuarioRepository usuarioRepository;
@@ -32,13 +34,17 @@ public class CadastroService {
 
         String email = usuarioDto.getEmail().trim().toLowerCase();
         String cnpj = empresaDto.getCnpj().trim();
+        String perfilUso = normalizarPerfil(request.getPerfil());
 
-        if (usuarioRepository.existsByEmail(email)) {
+        if (usuarioRepository.existsByEmailIgnoreCase(email)) {
             throw new CadastroException(HttpStatus.CONFLICT, "E-mail já cadastrado.");
         }
 
         if (empresaRepository.existsByCnpj(cnpj)) {
-            throw new CadastroException(HttpStatus.CONFLICT, "CNPJ já cadastrado.");
+            String mensagem = somenteDigitos(cnpj).length() == 11
+                    ? "CPF já cadastrado."
+                    : "CNPJ já cadastrado.";
+            throw new CadastroException(HttpStatus.CONFLICT, mensagem);
         }
 
         Perfil perfilAdmin = buscarPerfilAdmin()
@@ -53,6 +59,7 @@ public class CadastroService {
         if (empresaDto.getTelefone() != null && !empresaDto.getTelefone().isBlank()) {
             empresa.setTelefone(empresaDto.getTelefone().trim());
         }
+        empresa.setTipo(tipoEmpresa(perfilUso));
         empresa = empresaRepository.save(empresa);
 
         String hash = BCrypt.hashpw(usuarioDto.getSenha(), BCrypt.gensalt());
@@ -64,8 +71,35 @@ public class CadastroService {
         usuario.setPerfil(perfilAdmin);
         usuario.setEmpresa(empresa);
         usuario.setAtivo(1);
+        usuario.setPerfilUso(perfilUso);
+        if (usuarioDto.getCpf() != null && !usuarioDto.getCpf().isBlank()) {
+            usuario.setCpf(somenteDigitos(usuarioDto.getCpf()));
+        }
 
         return usuarioRepository.save(usuario);
+    }
+
+    private String normalizarPerfil(String perfil) {
+        if (perfil == null || perfil.isBlank()) {
+            return "Fornecedor";
+        }
+        String valor = perfil.trim();
+        if (!PERFIS_USO.contains(valor)) {
+            throw new CadastroException(HttpStatus.BAD_REQUEST, "Perfil de cadastro inválido.");
+        }
+        return valor;
+    }
+
+    private String tipoEmpresa(String perfilUso) {
+        return switch (perfilUso) {
+            case "Cliente" -> "CLIENTE";
+            case "ClienteFornecedor" -> "AMBOS";
+            default -> "DISTRIBUIDOR";
+        };
+    }
+
+    private String somenteDigitos(String valor) {
+        return valor == null ? "" : valor.replaceAll("\\D", "");
     }
 
     private java.util.Optional<Perfil> buscarPerfilAdmin() {

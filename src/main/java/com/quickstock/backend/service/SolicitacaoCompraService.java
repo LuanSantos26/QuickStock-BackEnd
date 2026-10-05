@@ -21,7 +21,7 @@ import java.util.List;
 @Service
 public class SolicitacaoCompraService {
 
-    private static final List<String> TIPOS_FORNECEDOR = List.of("DISTRIBUIDOR");
+    private static final List<String> TIPOS_FORNECEDOR = List.of("DISTRIBUIDOR", "AMBOS");
     private static final List<String> METODOS_PAGAMENTO = List.of("pix", "credito", "debito", "dinheiro");
     private static final long SEGUNDOS_PARA_ROTA = 20L;
     private static final long SEGUNDOS_PARA_ENTREGA = 55L;

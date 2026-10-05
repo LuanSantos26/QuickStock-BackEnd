@@ -18,14 +18,20 @@ public class UsuarioResponseDTO {
     private final Empresa       empresa;
     private final Integer       ativo;
     private final LocalDateTime criadoEm;
+    private final String        perfilUso;
+    private final String        cpf;
 
     public UsuarioResponseDTO(Usuario u) {
-        this.id       = u.getId();
-        this.nome     = u.getNome();
-        this.email    = u.getEmail();
-        this.perfil   = u.getPerfil();
-        this.empresa  = u.getEmpresa();
-        this.ativo    = u.getAtivo();
-        this.criadoEm = u.getCriadoEm();
+        this.id        = u.getId();
+        this.nome      = u.getNome();
+        this.email     = u.getEmail();
+        this.perfil    = u.getPerfil();
+        this.empresa   = u.getEmpresa();
+        this.ativo     = u.getAtivo();
+        this.criadoEm  = u.getCriadoEm();
+        this.perfilUso = u.getPerfilUso() == null || u.getPerfilUso().isBlank()
+                ? "Fornecedor"
+                : u.getPerfilUso();
+        this.cpf       = u.getCpf();
     }
 }
