@@ -1,0 +1,9 @@
+{
+  "name": "quickstock-relatorio",
+  "private": true,
+  "dependencies": {
+    "pdf-lib": "^1.17.1",
+    "pdfjs-dist": "3.11.174",
+    "puppeteer-core": "^24.23.0"
+  }
+}
