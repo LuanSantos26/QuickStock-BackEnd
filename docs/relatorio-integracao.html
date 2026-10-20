@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <title>Integração do aplicativo móvel QuickStock com a API de back-end</title>
+  <title>Integração do aplicativo móvel Stock4event com a API de back-end</title>
   <style>
     @page {
       size: A4;
@@ -225,7 +225,7 @@
 <body>
 
 <section class="sheet cover">
-  <div class="cover-top">QUICKSTOCK</div>
+  <div class="cover-top">STOCK4EVENT</div>
   <div class="cover-authors">
     José Ítalo S. C. Dantas<br />
     Leticia Viviane Pereira da Silva<br />
@@ -233,7 +233,7 @@
     Marcelo Vitor Viana da Silva
   </div>
   <div class="cover-title">
-    Integração do aplicativo móvel QuickStock<br />com a API de back-end
+    Integração do aplicativo móvel Stock4event<br />com a API de back-end
   </div>
   <div class="cover-bottom">
     Caruaru<br />2026
@@ -241,7 +241,7 @@
 </section>
 
 <section class="sheet rosto">
-  <div class="rosto-top">QUICKSTOCK</div>
+  <div class="rosto-top">STOCK4EVENT</div>
   <div class="rosto-authors">
     José Ítalo S. C. Dantas<br />
     Leticia Viviane Pereira da Silva<br />
@@ -249,7 +249,7 @@
     Marcelo Vitor Viana da Silva
   </div>
   <div class="rosto-title">
-    Integração do aplicativo móvel QuickStock<br />com a API de back-end
+    Integração do aplicativo móvel Stock4event<br />com a API de back-end
   </div>
   <p class="natureza">
     Relatório técnico que registra a API já em funcionamento e as alterações feitas para ligar o aplicativo móvel ao back-end, em especial o perfil de cadastro, a recuperação de senha e o módulo de logística. O cenário de demonstração do sistema usa empresas de Caruaru e região.
@@ -262,9 +262,9 @@
 <section class="sheet resumo">
   <h1 class="pre"><span class="mk">#resumo#</span>Resumo</h1>
   <p>
-    O QuickStock é um sistema de estoque, compras e operação de quiosques. O aplicativo, escrito em React Native com Expo, conversa com uma API REST em Java 17, Spring Boot 3.4 e PostgreSQL. Antes da integração descrita aqui, produtos, quiosques, marketplace, endereços, pagamentos, notificações e o resumo financeiro já eram lidos e gravados por essa API. O cadastro não persistia a escolha entre cliente, fornecedor ou os dois papéis: a conta nascia com perfil administrativo e a empresa ficava como compradora, enquanto o aplicativo guardava a escolha apenas no aparelho. A tela de nova senha chamava uma rota que não existia. Caminhoneiros e logística usavam listas fixas na tela. Este relatório explica o que já estava pronto e o que foi acrescentado: a coluna de perfil de uso, a classificação da empresa, a rota de recuperação de senha, a entrada de empresas dos dois papéis no marketplace e os recursos de caminhoneiro e de resumo logístico. O atalho de login que não passava pela API foi removido do aplicativo.
+    O Stock4event é um sistema de estoque, compras e operação de quiosques. O aplicativo, escrito em React Native com Expo, conversa com uma API REST em Java 17, Spring Boot 3.4 e PostgreSQL. Antes da integração descrita aqui, produtos, quiosques, marketplace, endereços, pagamentos, notificações e o resumo financeiro já eram lidos e gravados por essa API. O cadastro não persistia a escolha entre cliente, fornecedor ou os dois papéis: a conta nascia com perfil administrativo e a empresa ficava como compradora, enquanto o aplicativo guardava a escolha apenas no aparelho. A tela de nova senha chamava uma rota que não existia. Caminhoneiros e logística usavam listas fixas na tela. Este relatório explica o que já estava pronto e o que foi acrescentado: a coluna de perfil de uso, a classificação da empresa, a rota de recuperação de senha, a entrada de empresas dos dois papéis no marketplace e os recursos de caminhoneiro e de resumo logístico. O atalho de login que não passava pela API foi removido do aplicativo.
   </p>
-  <p class="palavras"><strong>Palavras-chave:</strong> QuickStock. API REST. Aplicativo móvel. Cadastro. Logística.</p>
+  <p class="palavras"><strong>Palavras-chave:</strong> Stock4event. API REST. Aplicativo móvel. Cadastro. Logística.</p>
 </section>
 
 <section class="sheet listas">
@@ -305,7 +305,7 @@
   <p class="toc-row primario"><span class="titulo">1 Introdução</span><span class="pontos"></span><span class="pag">__P_sec1__</span></p>
   <p class="toc-row nivel2"><span class="titulo">1.1 Objetivo</span><span class="pontos"></span><span class="pag">__P_sec11__</span></p>
   <p class="toc-row nivel2"><span class="titulo">1.2 Delimitação</span><span class="pontos"></span><span class="pag">__P_sec12__</span></p>
-  <p class="toc-row primario"><span class="titulo">2 O sistema QuickStock</span><span class="pontos"></span><span class="pag">__P_sec2__</span></p>
+  <p class="toc-row primario"><span class="titulo">2 O sistema Stock4event</span><span class="pontos"></span><span class="pag">__P_sec2__</span></p>
   <p class="toc-row nivel2"><span class="titulo">2.1 O aplicativo</span><span class="pontos"></span><span class="pag">__P_sec21__</span></p>
   <p class="toc-row nivel2"><span class="titulo">2.2 API</span><span class="pontos"></span><span class="pag">__P_sec22__</span></p>
   <p class="toc-row nivel2"><span class="titulo">2.3 A ligação entre os dois</span><span class="pontos"></span><span class="pag">__P_sec23__</span></p>
@@ -330,7 +330,7 @@
 <h1 class="primeira"><span class="mk">#sec1#</span>1 Introdução</h1>
 
 <p>
-  Operar estoque, compra e quiosque no QuickStock depende de duas partes que precisam concordar sobre os mesmos dados. De um lado está o aplicativo móvel. Do outro, a API que grava usuários, empresas, produtos, pedidos e pagamentos no PostgreSQL. A maior parte dessa conversa já existia. O que faltava era fazer o cadastro, a sessão e a logística obedecerem ao que as telas novas passaram a pedir.
+  Operar estoque, compra e quiosque no Stock4event depende de duas partes que precisam concordar sobre os mesmos dados. De um lado está o aplicativo móvel. Do outro, a API que grava usuários, empresas, produtos, pedidos e pagamentos no PostgreSQL. A maior parte dessa conversa já existia. O que faltava era fazer o cadastro, a sessão e a logística obedecerem ao que as telas novas passaram a pedir.
 </p>
 <p>
   Este relatório foi escrito a partir do código dos dois projetos, no estado de setembro de 2026. Ele separa, de propósito, o que já funcionava do que foi construído na integração. A separação evita tratar rota antiga como novidade e evita descrever como pronto um comportamento que a tela apenas simulava.
@@ -346,15 +346,15 @@
   O texto cobre a API em Spring Boot e os pontos do aplicativo que precisaram mudar para consumi-la. Telas de produto, quiosque, sacola, endereço e pagamento já chamavam a API e não foram reescritas. Também não entra aqui o desenho visual dessas telas. O rastreio descrito na logística é o que a API calcula a partir do status gravado. Não há integração com operadora de transporte, mapa ou mensagem de e-mail.
 </p>
 
-<h1><span class="mk">#sec2#</span>2 O sistema QuickStock</h1>
+<h1><span class="mk">#sec2#</span>2 O sistema Stock4event</h1>
 
 <p>
-  O QuickStock atende quem vende em quiosque e quem compra de distribuidoras. O mesmo aplicativo muda de conjunto de abas conforme o papel da conta. Cliente percorre exploração, carrinho e pedidos. Fornecedor, e também quem acumula os dois papéis, trabalha com estoque, quiosque, compras e o painel da empresa. Essa escolha de interface só é confiável se o papel vier do servidor, e não de um valor esquecido no aparelho.
+  O Stock4event atende quem vende em quiosque e quem compra de distribuidoras. O mesmo aplicativo muda de conjunto de abas conforme o papel da conta. Cliente percorre exploração, carrinho e pedidos. Fornecedor, e também quem acumula os dois papéis, trabalha com estoque, quiosque, compras e o painel da empresa. Essa escolha de interface só é confiável se o papel vier do servidor, e não de um valor esquecido no aparelho.
 </p>
 
 <h2><span class="mk">#sec21#</span>2.1 O aplicativo</h2>
 <p>
-  O aplicativo está em React Native com Expo e TypeScript. A navegação separa o fluxo de entrada (animação, boas-vindas, escolha de papel, cadastro, login e senha esquecida) do fluxo autenticado. Serviços em <span class="mono">src/services</span> concentram as chamadas HTTP. O endereço base é a porta 8080. No emulador Android o host de desenvolvimento é 10.0.2.2. No aparelho, o host sai do endereço que o Expo informa. No restante dos casos, usa-se localhost.
+  O aplicativo está em React Native com Expo e TypeScript. A navegação separa o fluxo de entrada (animação, boas-vindas, escolha de papel, cadastro, login e senha esquecida) do fluxo autenticado. Serviços em <span class="mono">src/services</span> concentram as chamadas HTTP. O endereço base é a porta 8081. No emulador Android o host de desenvolvimento é 10.0.2.2. No aparelho, o host sai do endereço que o Expo informa. No restante dos casos, usa-se localhost.
 </p>
 <p>
   A sessão guarda o token, o usuário e o instante de expiração. Ao reabrir o aplicativo, a rota <span class="mono">GET /api/usuarios/me</span> confirma o token e devolve o usuário atual. Se a resposta falha, a sessão local é descartada.
@@ -372,7 +372,7 @@
   <svg viewBox="0 0 680 430" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Camadas da API">
     <rect x="170" y="12" width="340" height="52" fill="#fff" stroke="#000" stroke-width="1.4"/>
     <text x="340" y="34" text-anchor="middle" font-family="Times New Roman, serif" font-size="15">Aplicativo móvel (Expo)</text>
-    <text x="340" y="52" text-anchor="middle" font-family="Times New Roman, serif" font-size="13">HTTP e JSON na porta 8080</text>
+    <text x="340" y="52" text-anchor="middle" font-family="Times New Roman, serif" font-size="13">HTTP e JSON na porta 8081</text>
     <line x1="340" y1="64" x2="340" y2="88" stroke="#000" stroke-width="1.2"/>
     <polygon points="334,88 346,88 340,98" fill="#000"/>
     <rect x="140" y="102" width="400" height="46" fill="#f4f4f4" stroke="#000" stroke-width="1.4"/>
@@ -388,7 +388,7 @@
     <line x1="340" y1="308" x2="340" y2="328" stroke="#000" stroke-width="1.2"/>
     <polygon points="334,328 346,328 340,338" fill="#000"/>
     <rect x="170" y="342" width="340" height="52" fill="#fff" stroke="#000" stroke-width="1.4"/>
-    <text x="340" y="364" text-anchor="middle" font-family="Times New Roman, serif" font-size="15">PostgreSQL — base quickstock</text>
+    <text x="340" y="364" text-anchor="middle" font-family="Times New Roman, serif" font-size="15">PostgreSQL — base stock4event</text>
     <text x="340" y="382" text-anchor="middle" font-family="Times New Roman, serif" font-size="13">localhost, porta 5432</text>
   </svg>
   <figcaption><span class="mk">#fig1#</span>Figura 1 – Camadas da API e o ponto em que o aplicativo entra</figcaption>
@@ -407,7 +407,7 @@
 
 <h2><span class="mk">#sec31#</span>3.1 Organização do código</h2>
 <p>
-  O pacote <span class="mono">com.quickstock.backend</span> já reunia config, controller, dto, entity, exception, repository e service. Erros de validação e de regra de cadastro saem num JSON com a chave <span class="mono">erro</span>, no formato que o aplicativo já sabe mostrar. Os controllers declaram CORS aberto, o que permite o Expo Web chamar a API a partir de outra origem. No aplicativo nativo essa liberação não é exigida pelo aparelho, mas não atrapalha.
+  O pacote <span class="mono">com.stock4event.backend</span> já reunia config, controller, dto, entity, exception, repository e service. Erros de validação e de regra de cadastro saem num JSON com a chave <span class="mono">erro</span>, no formato que o aplicativo já sabe mostrar. Os controllers declaram CORS aberto, o que permite o Expo Web chamar a API a partir de outra origem. No aplicativo nativo essa liberação não é exigida pelo aparelho, mas não atrapalha.
 </p>
 <p>
   A subida da aplicação cria ou ajusta tabelas e, depois, executa <span class="mono">data.sql</span>. Esse script já inseria o perfil Admin, colunas de estoque e de pedido, cartões salvos e três distribuidoras de demonstração: Casa dos Vinhos, Cervejaria Caruaru e Whisky Labs, com produtos e imagens.
@@ -733,7 +733,7 @@
 <h1><span class="mk">#sec6#</span>6 Considerações finais</h1>
 
 <p>
-  O aplicativo e a API já formavam um sistema na maior parte do fluxo comercial. A falha estava no que a interface decidia sozinha: o papel da conta, a senha esquecida e a logística de demonstração. Com o perfil gravado no usuário, o tipo da empresa alinhado a esse perfil e as três rotas novas, essas telas passam a ler e gravar o mesmo PostgreSQL que o restante do QuickStock.
+  O aplicativo e a API já formavam um sistema na maior parte do fluxo comercial. A falha estava no que a interface decidia sozinha: o papel da conta, a senha esquecida e a logística de demonstração. Com o perfil gravado no usuário, o tipo da empresa alinhado a esse perfil e as três rotas novas, essas telas passam a ler e gravar o mesmo PostgreSQL que o restante do Stock4event.
 </p>
 <p>
   Para ver as rotas novas, a API precisa ser reiniciada depois da atualização do código, de modo que o Hibernate crie <span class="mono">caminhoneiros</span> e <span class="mono">entregas_logistica</span> e o script preencha <span class="mono">perfil_uso</span> nas contas já existentes. O login de teste que não consultava o banco não faz mais parte do aplicativo.
@@ -743,7 +743,7 @@
 
 <div class="ref">
   <p>EXPO. <strong>Expo documentation</strong>. Disponível em: https://docs.expo.dev/. Acesso em: 27 set. 2026.</p>
-  <p>FIELDING, R. T. <strong>Architectural styles and the design of network-based software architectures</strong>. 2000. Tese (Doutorado em Ciência da Informação e Computação) – University of California, Irvine, 2000. O capítulo 5 define o estilo REST usado pela API do QuickStock.</p>
+  <p>FIELDING, R. T. <strong>Architectural styles and the design of network-based software architectures</strong>. 2000. Tese (Doutorado em Ciência da Informação e Computação) – University of California, Irvine, 2000. O capítulo 5 define o estilo REST usado pela API do Stock4event.</p>
   <p>JONES, M.; BRADLEY, J.; SAKIMURA, N. <strong>RFC 7519</strong>: JSON Web Token (JWT). Fremont: IETF, 2015. Disponível em: https://www.rfc-editor.org/rfc/rfc7519. Acesso em: 27 set. 2026.</p>
   <p>ORACLE. <strong>Java SE 17 documentation</strong>. Disponível em: https://docs.oracle.com/en/java/javase/17/. Acesso em: 27 set. 2026.</p>
   <p>POSTGRESQL GLOBAL DEVELOPMENT GROUP. <strong>PostgreSQL documentation</strong>. Disponível em: https://www.postgresql.org/docs/. Acesso em: 27 set. 2026.</p>

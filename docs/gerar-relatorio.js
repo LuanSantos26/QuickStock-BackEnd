@@ -6,7 +6,7 @@ const pdfjsLib = require('pdfjs-dist/legacy/build/pdf.js');
 
 const root = __dirname;
 const templatePath = path.join(root, 'relatorio-integracao.html');
-const outPath = path.join(root, 'Relatorio-Integracao-QuickStock-ABNT.pdf');
+const outPath = path.join(root, 'Relatorio-Integracao-Stock4event-ABNT.pdf');
 const workPath = path.join(root, '.relatorio-work.pdf');
 
 const SLOTS = [

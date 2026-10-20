@@ -1,6 +1,6 @@
-# 🚀 QuickStock API
+# 🚀 Stock4event API
 
-Backend do sistema **QuickStock**, uma plataforma completa para gerenciamento de estoque, vendas, eventos e controle financeiro.
+Backend do sistema **Stock4event**, uma plataforma completa para gerenciamento de estoque, vendas, eventos e controle financeiro.
 
 A API foi desenvolvida utilizando **Java 17**, **Spring Boot** e **PostgreSQL**, seguindo uma arquitetura escalável baseada em camadas, preparada para futuras expansões e integração com aplicações web, mobile e sistemas de terceiros.
 
@@ -8,7 +8,7 @@ A API foi desenvolvida utilizando **Java 17**, **Spring Boot** e **PostgreSQL**,
 
 ## 📖 Sobre o Projeto
 
-O QuickStock foi criado para centralizar a gestão operacional de empresas que necessitam controlar:
+O Stock4event foi criado para centralizar a gestão operacional de empresas que necessitam controlar:
 
 * Estoque de produtos
 * Vendas e pedidos
@@ -98,7 +98,7 @@ O sistema foi projetado para ser modular, permitindo a inclusão de novos recurs
 A aplicação segue o padrão de arquitetura em camadas:
 
 ```text
-src/main/java/com/quickstock
+src/main/java/com/stock4event
 │
 ├── config
 ├── controller
@@ -150,13 +150,13 @@ cd quickstock-backend
 ### 2. Criar o banco de dados
 
 ```sql
-CREATE DATABASE quickstock;
+CREATE DATABASE stock4event;
 ```
 
 ### 3. Configurar o application.properties
 
 ```properties
-spring.datasource.url=jdbc:postgresql://localhost:5432/quickstock
+spring.datasource.url=jdbc:postgresql://localhost:5432/stock4event
 spring.datasource.username=postgres
 spring.datasource.password=sua_senha
 
@@ -190,7 +190,7 @@ http://localhost:8081
 
 Ao iniciar, o `DemoSeedRunner` cria (se ainda não existir) uma conta administradora para a apresentação, com acesso às telas de cliente e de fornecedor, já com endereço, cartão e chave PIX:
 
-* E-mail: `demo@quickstock.com`
+* E-mail: `demo@stock4event.com`
 * Senha: `demo1234`
 * Empresa: Mercado Demo (perfil Cliente e fornecedor)
 

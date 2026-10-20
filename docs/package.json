@@ -1,5 +1,5 @@
 {
-  "name": "quickstock-relatorio",
+  "name": "stock4event-relatorio",
   "private": true,
   "dependencies": {
     "pdf-lib": "^1.17.1",
