@@ -186,6 +186,14 @@ A aplicação ficará disponível em:
 http://localhost:8081
 ```
 
+### Conta de demonstração
+
+Ao iniciar, o `DemoSeedRunner` cria (se ainda não existir) uma conta administradora para a apresentação, com acesso às telas de cliente e de fornecedor, já com endereço, cartão e chave PIX:
+
+* E-mail: `demo@quickstock.com`
+* Senha: `demo1234`
+* Empresa: Mercado Demo (perfil Cliente e fornecedor)
+
 ---
 
 ## 📚 Documentação da API
