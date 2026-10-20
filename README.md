@@ -183,7 +183,7 @@ mvnw.cmd spring-boot:run
 A aplicação ficará disponível em:
 
 ```text
-http://localhost:8080
+http://localhost:8081
 ```
 
 ---
@@ -195,19 +195,19 @@ Após iniciar a aplicação:
 ### Swagger UI
 
 ```text
-http://localhost:8080/swagger
+http://localhost:8081/swagger
 ```
 
 ou
 
 ```text
-http://localhost:8080/swagger-ui/index.html
+http://localhost:8081/swagger-ui/index.html
 ```
 
 ### OpenAPI JSON
 
 ```text
-http://localhost:8080/v3/api-docs
+http://localhost:8081/v3/api-docs
 ```
 
 ---
