@@ -47,6 +47,17 @@ public class EstoqueProdutoService {
         produtoRepository.save(produto);
     }
 
+    /** Devolve ao fornecedor o estoque de uma solicitação cancelada. */
+    @Transactional
+    public void devolverEstoqueFornecedor(SolicitacaoCompra solicitacao) {
+        for (ItemSolicitacaoCompra item : itemSolicitacaoRepository.findBySolicitacaoId(solicitacao.getId())) {
+            Produto produto = item.getProduto();
+            BigDecimal estoqueAtual = produto.getEstoque() != null ? produto.getEstoque() : BigDecimal.ZERO;
+            produto.setEstoque(estoqueAtual.add(item.getQuantidade()));
+            produtoRepository.save(produto);
+        }
+    }
+
     @Transactional
     public void creditarCompradorSeNecessario(SolicitacaoCompra solicitacao) {
         if (Boolean.TRUE.equals(solicitacao.getEstoqueCompradorCreditado())) {

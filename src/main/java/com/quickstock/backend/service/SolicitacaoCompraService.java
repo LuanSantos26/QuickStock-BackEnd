@@ -8,6 +8,7 @@ import com.quickstock.backend.entity.*;
 import com.quickstock.backend.exception.CadastroException;
 import com.quickstock.backend.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,6 +37,102 @@ public class SolicitacaoCompraService {
     @Autowired private ItemPedidoRepository itemPedidoRepository;
     @Autowired private PagamentoRepository pagamentoRepository;
     @Autowired private EstoqueProdutoService estoqueProdutoService;
+
+    /**
+     * Avança o status sozinho pelo tempo (20 s → em rota, 55 s → entregue), para a demo
+     * funcionar com distribuidoras que não têm usuário. Com false, só o fornecedor muda o status.
+     */
+    @Value("${quickstock.pedidos.status-automatico:true}")
+    private boolean statusAutomatico;
+
+    public List<SolicitacaoCompraResponseDTO> listarRecebidas(Long empresaFornecedoraId) {
+        return solicitacaoRepository.findByEmpresaFornecedoraIdOrderByCriadoEmDesc(empresaFornecedoraId).stream()
+                .map(this::atualizarStatusDemonstracao)
+                .map(this::toResponse)
+                .toList();
+    }
+
+    /** Fornecedor avança o pedido (em_rota → entregue) ou cancela antes da entrega. */
+    @Transactional
+    public SolicitacaoCompraResponseDTO atualizarStatus(Long id, Long empresaFornecedoraId, String novoStatus) {
+        SolicitacaoCompra solicitacao = buscar(id);
+        if (!solicitacao.getEmpresaFornecedora().getId().equals(empresaFornecedoraId)) {
+            throw new CadastroException(HttpStatus.BAD_REQUEST, "Pedido não pertence ao fornecedor informado.");
+        }
+
+        String atual = statusAtual(solicitacao);
+        String status = novoStatus == null ? "" : novoStatus.trim().toLowerCase();
+        boolean permitido = switch (status) {
+            case "em_rota" -> "aguardando_liberacao".equals(atual);
+            case "entregue" -> "em_rota".equals(atual);
+            case "cancelada" -> "aguardando_liberacao".equals(atual) || "em_rota".equals(atual);
+            default -> false;
+        };
+        if (!permitido) {
+            throw new CadastroException(
+                    HttpStatus.BAD_REQUEST,
+                    "Não é possível mudar o pedido de \"" + labelStatus(atual) + "\" para \"" + status + "\"."
+            );
+        }
+
+        return toResponse(aplicarStatus(solicitacao, status));
+    }
+
+    /** Comprador cancela enquanto o pedido ainda não saiu para entrega. */
+    @Transactional
+    public SolicitacaoCompraResponseDTO cancelarPeloComprador(Long id, Long empresaCompradoraId) {
+        SolicitacaoCompra solicitacao = buscar(id);
+        if (!solicitacao.getEmpresaCompradora().getId().equals(empresaCompradoraId)) {
+            throw new CadastroException(HttpStatus.BAD_REQUEST, "Pedido não pertence à empresa informada.");
+        }
+
+        solicitacao = atualizarStatusDemonstracao(solicitacao);
+        if (!"aguardando_liberacao".equals(statusAtual(solicitacao))) {
+            throw new CadastroException(
+                    HttpStatus.BAD_REQUEST,
+                    "Só é possível cancelar antes de o pedido sair para entrega."
+            );
+        }
+
+        return toResponse(aplicarStatus(solicitacao, "cancelada"));
+    }
+
+    private SolicitacaoCompra buscar(Long id) {
+        return solicitacaoRepository.findById(id)
+                .orElseThrow(() -> new CadastroException(HttpStatus.NOT_FOUND, "Pedido não encontrado."));
+    }
+
+    private String statusAtual(SolicitacaoCompra solicitacao) {
+        return solicitacao.getStatus() != null ? solicitacao.getStatus() : "aguardando_liberacao";
+    }
+
+    /** Grava o novo status na solicitação e no pedido, e aplica os efeitos de estoque e pagamento. */
+    private SolicitacaoCompra aplicarStatus(SolicitacaoCompra solicitacao, String status) {
+        solicitacao.setStatus(status);
+        solicitacao = solicitacaoRepository.save(solicitacao);
+
+        Pedido pedido = solicitacao.getPedido();
+        if (pedido != null) {
+            pedido.setStatus(status);
+            pedidoRepository.save(pedido);
+        }
+
+        if ("entregue".equals(status)) {
+            estoqueProdutoService.creditarCompradorSeNecessario(solicitacao);
+        }
+
+        if ("cancelada".equals(status)) {
+            estoqueProdutoService.devolverEstoqueFornecedor(solicitacao);
+            if (pedido != null) {
+                for (Pagamento pagamento : pagamentoRepository.findByPedidoId(pedido.getId())) {
+                    pagamento.setStatus("aprovado".equals(pagamento.getStatus()) ? "estornado" : "cancelado");
+                    pagamentoRepository.save(pagamento);
+                }
+            }
+        }
+
+        return solicitacao;
+    }
 
     public List<SolicitacaoCompraResponseDTO> listarPorComprador(Long empresaCompradoraId) {
         return solicitacaoRepository.findByEmpresaCompradoraIdOrderByCriadoEmDesc(empresaCompradoraId).stream()
@@ -246,21 +343,18 @@ public class SolicitacaoCompraService {
     }
 
     private SolicitacaoCompra atualizarStatusDemonstracao(SolicitacaoCompra solicitacao) {
-        if (solicitacao.getCriadoEm() == null) return solicitacao;
+        if (!statusAutomatico || solicitacao.getCriadoEm() == null) return solicitacao;
 
         long segundos = Duration.between(solicitacao.getCriadoEm(), LocalDateTime.now()).getSeconds();
-        String status = solicitacao.getStatus() != null ? solicitacao.getStatus() : "aguardando_liberacao";
+        String status = statusAtual(solicitacao);
 
         if ("aguardando_liberacao".equals(status) && segundos >= SEGUNDOS_PARA_ROTA) {
-            solicitacao.setStatus("em_rota");
-            return solicitacaoRepository.save(solicitacao);
+            solicitacao = aplicarStatus(solicitacao, "em_rota");
+            status = "em_rota";
         }
 
         if ("em_rota".equals(status) && segundos >= SEGUNDOS_PARA_ENTREGA) {
-            solicitacao.setStatus("entregue");
-            solicitacao = solicitacaoRepository.save(solicitacao);
-            estoqueProdutoService.creditarCompradorSeNecessario(solicitacao);
-            return solicitacao;
+            solicitacao = aplicarStatus(solicitacao, "entregue");
         }
 
         return solicitacao;
@@ -329,13 +423,15 @@ public class SolicitacaoCompraService {
             case "aguardando_liberacao" -> 1;
             case "em_rota" -> 2;
             case "entregue" -> -1;
+            case "cancelada" -> -2;
             default -> 1;
         };
 
         List<StatusPedidoDTO> etapas = new ArrayList<>();
         for (int i = 0; i < defs.size(); i++) {
             EtapaDef def = defs.get(i);
-            boolean concluida = indiceAtivo == -1 || i < indiceAtivo;
+            // Cancelado: só a confirmação fica concluída e nenhuma etapa fica ativa.
+            boolean concluida = indiceAtivo == -1 || (indiceAtivo == -2 ? i == 0 : i < indiceAtivo);
             boolean ativa = i == indiceAtivo;
             etapas.add(new StatusPedidoDTO(def.codigo(), def.label(), i + 1, concluida, ativa));
         }

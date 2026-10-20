@@ -13,6 +13,7 @@ import java.util.List;
 public interface PedidoRepository extends JpaRepository<Pedido, Long> {
     List<Pedido> findByBarracaId(Long barracaId);
     List<Pedido> findByBarracaIdAndStatus(Long barracaId, String status);
+    List<Pedido> findByEnderecoEntregaId(Long enderecoEntregaId);
 
     @Query("""
             SELECT p FROM Pedido p

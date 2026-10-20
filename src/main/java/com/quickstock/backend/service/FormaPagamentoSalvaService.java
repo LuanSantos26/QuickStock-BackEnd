@@ -68,14 +68,43 @@ public class FormaPagamentoSalvaService {
     }
 
     @Transactional
+    public FormaPagamentoSalvaDTO definirPrincipal(Long id, Long empresaId) {
+        FormaPagamentoSalva escolhida = buscarDaEmpresa(id, empresaId);
+        for (FormaPagamentoSalva f : formaRepository.findByEmpresaIdOrderByPrincipalDescIdAsc(empresaId)) {
+            boolean principal = f.getId().equals(escolhida.getId());
+            if (principal != f.isPrincipal()) {
+                f.setPrincipal(principal);
+                formaRepository.save(f);
+            }
+        }
+        escolhida.setPrincipal(true);
+        return new FormaPagamentoSalvaDTO(escolhida);
+    }
+
+    @Transactional
     public void remover(Long id, Long empresaId) {
+        FormaPagamentoSalva forma = buscarDaEmpresa(id, empresaId);
+        boolean eraPrincipal = forma.isPrincipal();
+
+        formaRepository.delete(forma);
+
+        if (eraPrincipal) {
+            formaRepository.findByEmpresaIdOrderByPrincipalDescIdAsc(empresaId).stream()
+                    .findFirst()
+                    .ifPresent(f -> {
+                        f.setPrincipal(true);
+                        formaRepository.save(f);
+                    });
+        }
+    }
+
+    private FormaPagamentoSalva buscarDaEmpresa(Long id, Long empresaId) {
         FormaPagamentoSalva forma = formaRepository.findById(id)
                 .orElseThrow(() -> new CadastroException(HttpStatus.NOT_FOUND, "Forma de pagamento não encontrada."));
 
         if (!forma.getEmpresa().getId().equals(empresaId)) {
             throw new CadastroException(HttpStatus.BAD_REQUEST, "Forma de pagamento não pertence à empresa informada.");
         }
-
-        formaRepository.delete(forma);
+        return forma;
     }
 }

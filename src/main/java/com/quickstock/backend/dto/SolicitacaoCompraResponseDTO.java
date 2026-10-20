@@ -15,6 +15,8 @@ public class SolicitacaoCompraResponseDTO {
     private final Long pedidoId;
     private final Long fornecedorId;
     private final String fornecedorNome;
+    private final Long compradorId;
+    private final String compradorNome;
     private final String status;
     private final BigDecimal valorTotal;
     private final String observacao;
@@ -39,6 +41,8 @@ public class SolicitacaoCompraResponseDTO {
         this.pedidoId = solicitacao.getPedido() != null ? solicitacao.getPedido().getId() : null;
         this.fornecedorId = solicitacao.getEmpresaFornecedora().getId();
         this.fornecedorNome = solicitacao.getEmpresaFornecedora().getNome();
+        this.compradorId = solicitacao.getEmpresaCompradora().getId();
+        this.compradorNome = solicitacao.getEmpresaCompradora().getNome();
         this.status = solicitacao.getStatus();
         this.valorTotal = solicitacao.getValorTotal();
         this.observacao = solicitacao.getObservacao();

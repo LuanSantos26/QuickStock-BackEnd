@@ -27,6 +27,11 @@ public class FormaPagamentoSalvaController {
         return ResponseEntity.status(201).body(formaPagamentoSalvaService.criar(dto));
     }
 
+    @PatchMapping("/{id}/principal")
+    public FormaPagamentoSalvaDTO definirPrincipal(@PathVariable Long id, @RequestParam Long empresaId) {
+        return formaPagamentoSalvaService.definirPrincipal(id, empresaId);
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> remover(@PathVariable Long id, @RequestParam Long empresaId) {
         formaPagamentoSalvaService.remover(id, empresaId);

@@ -37,4 +37,20 @@ public class EnderecoEntregaController {
     public ResponseEntity<EnderecoEntregaDTO> criar(@Valid @RequestBody EnderecoEntregaRequestDTO dto) {
         return ResponseEntity.status(201).body(enderecoEntregaService.criar(dto));
     }
+
+    @PutMapping("/{id}")
+    public EnderecoEntregaDTO atualizar(@PathVariable Long id, @Valid @RequestBody EnderecoEntregaRequestDTO dto) {
+        return enderecoEntregaService.atualizar(id, dto);
+    }
+
+    @PatchMapping("/{id}/principal")
+    public EnderecoEntregaDTO definirPrincipal(@PathVariable Long id, @RequestParam Long empresaId) {
+        return enderecoEntregaService.definirPrincipal(id, empresaId);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> remover(@PathVariable Long id, @RequestParam Long empresaId) {
+        enderecoEntregaService.remover(id, empresaId);
+        return ResponseEntity.noContent().build();
+    }
 }

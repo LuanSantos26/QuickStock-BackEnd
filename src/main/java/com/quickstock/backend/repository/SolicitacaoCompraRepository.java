@@ -12,6 +12,7 @@ import java.util.List;
 @Repository
 public interface SolicitacaoCompraRepository extends JpaRepository<SolicitacaoCompra, Long> {
     List<SolicitacaoCompra> findByEmpresaCompradoraIdOrderByCriadoEmDesc(Long empresaCompradoraId);
+    List<SolicitacaoCompra> findByEmpresaFornecedoraIdOrderByCriadoEmDesc(Long empresaFornecedoraId);
 
     @Query("""
             SELECT s FROM SolicitacaoCompra s
