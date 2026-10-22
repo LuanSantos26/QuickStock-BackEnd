@@ -1,144 +1,96 @@
-[readme_md.md](https://github.com/user-attachments/files/33796925/readme_md.md)
-# 📦 Stock4Event API Backend
+# 📦 Stock4Event - Backend
 
-O **Stock4Event** é uma plataforma completa e modular projetada para o gerenciamento de estoque, vendas de PDV (eventos/barracas), marketplace B2B (compradores e fornecedores), acompanhamento logístico e controle financeiro.
+[![Java](https://img.shields.io/badge/Java-17-007396?style=for-the-badge&logo=java&logoColor=white)](https://www.java.com/)
+[![Spring Boot](https://img.shields.io/badge/Spring_Boot-3.4.0-6DB33F?style=for-the-badge&logo=spring-boot&logoColor=white)](https://spring.io/projects/spring-boot)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white)](https://www.postgresql.org/)
 
-Esta API foi desenvolvida seguindo os padrões RESTful, utilizando uma arquitetura em camadas escalável e segura.
+O **Stock4Event Backend** é a API REST que alimenta o ecossistema Stock4Event. Desenvolvido com **Java 17** e **Spring Boot**, este sistema foi projetado para centralizar e otimizar a gestão operacional de estoques, vendas, eventos e controle financeiro de forma escalável e segura.
 
-## ✨ Principais Funcionalidades
+Este repositório fornece a inteligência e persistência de dados consumidas pelo [Aplicativo Mobile Stock4Event](https://github.com/marcelo435/Mobile).
 
-### 👥 Gestão de Usuários e Segurança
+---
 
-* Cadastro de empresas com diferentes perfis: **Cliente**, **Fornecedor** ou **Ambos**.
-* Autenticação e autorização seguras via **JWT (JSON Web Token)**.
-* Criptografia de senhas utilizando **BCrypt**.
-* Fluxo de recuperação de senhas.
+## 🎯 Sobre o Projeto
 
-### 🏪 Marketplace B2B e Compras
+O Stock4Event foi criado para centralizar a gestão operacional de empresas que necessitam controlar:
 
-* Catálogo de distribuidores integrados.
-* Sistema de solicitação de compras entre lojistas e fornecedores.
-* Atualização de status de pedidos (Aguardando liberação, Em rota, Entregue).
-* Integração de endereços via API **ViaCEP**.
+* Estoque de produtos
+* Vendas e pedidos
+* Clientes e fornecedores
+* Eventos e barracas
+* Fluxo financeiro
+* Upload de arquivos e imagens
+* Controle de acesso por perfil de usuário
 
-### 📦 Gestão de Estoque e Produtos
+O sistema foi projetado para ser modular, seguindo uma arquitetura baseada em camadas, permitindo a inclusão de novos recursos sem impactar a estrutura principal da aplicação e facilitando integrações futuras.
 
-* Controle rigoroso de estoque com baixa e crédito automático de itens.
-* Códigos gerados dinamicamente para o catálogo de produtos.
-* Upload de imagens de produtos com armazenamento e validação de formato.
+---
 
-### 🚚 Logística e Rastreio
+## 🚀 Principais Funcionalidades
 
-* Cadastro de caminhoneiros e rotas.
-* Linha do tempo de entregas (Separação, Carregamento, Em trânsito, Entregue).
-* Cálculo de status dinâmico e rastreio de motoristas.
+* **🔒 Gestão de Usuários e Segurança:**
+  * Cadastro de usuários com perfis de acesso distintos.
+  * Autenticação segura via JWT (JSON Web Token).
+  * Controle rigoroso de permissões e rotas.
+* **📦 Gestão de Estoque:**
+  * Cadastro detalhado de produtos.
+  * Controle de quantidade e atualização automática de saldo.
+  * Gestão integrada de fornecedores.
+* **🛍️ Gestão de Vendas:**
+  * Registro completo de pedidos.
+  * Histórico detalhado de vendas.
+  * Controle de status de pedidos (com avanço automático para demonstrações).
+  * Integração direta com a baixa de estoque.
+* **🎪 Gestão de Eventos:**
+  * Cadastro e organização de eventos e barracas.
+  * Distribuição inteligente de estoque por evento.
+  * Monitoramento de vendas em tempo real.
+* **💰 Módulo Financeiro:**
+  * Registro e acompanhamento de pagamentos.
+  * Controle de receitas e emissão de relatórios financeiros.
+  * Resumo mensal de faturamento.
+* **📁 Upload de Arquivos:**
+  * Upload de imagens para produtos e logotipos de empresas.
+  * Armazenamento local configurado de forma estática.
 
-### 📊 Dashboard Financeiro
-
-* Resumo mensal de faturamento, custos e margem de lucro.
-* Controle de movimentação diária de estoque (StockDia).
-* Gerenciamento de métodos de pagamento salvos (PIX, Cartões de Crédito/Débito mascarados).
-
-### 🎪 PDV e Eventos
-
-* Criação de eventos e alocação de "Barracas/Quiosques".
-* Transferência de estoque do depósito principal para as barracas.
-* Registro de pedidos de ponto de venda (PDV).
+---
 
 ## 🛠️ Tecnologias Utilizadas
 
-* **Linguagem:** Java 17
-* **Framework:** Spring Boot 3.4.0
-* **Banco de Dados:** PostgreSQL
-* **Segurança:** Spring Security + JWT (JJWT)
-* **ORM:** Spring Data JPA / Hibernate
-* **Documentação:** SpringDoc OpenAPI (Swagger UI)
-* **Ferramentas:** Maven, Lombok
+**Backend & Frameworks:**
+* Java 17
+* Spring Boot 3.4
+* Spring Data JPA
+* Hibernate ORM
+* Maven
+* Lombok
 
-## 🚀 Como Executar o Projeto Localmente
+**Banco de Dados:**
+* PostgreSQL
 
-### Pré-requisitos
+**Segurança:**
+* Spring Security
+* JWT (JSON Web Token)
+* BCrypt (Hash de senhas)
 
-* Java 17 ou superior
-* PostgreSQL 14 ou superior
-* Maven 3.9+ (ou use o *wrapper* incluso)
+**Documentação:**
+* Swagger / OpenAPI 3
+* SpringDoc OpenAPI
 
-### Passo a Passo
+---
 
-1. **Clone o repositório:**
+## 📁 Estrutura do Projeto (Arquitetura em Camadas)
 
-   ```bash
-   git clone https://github.com/seu-usuario/stock4event-backend.git
-   cd stock4event-backend
-   ```
-
-2. **Configure o Banco de Dados:**
-   Crie um banco de dados no PostgreSQL chamado `quickstock` (nome configurado atualmente no arquivo `application.properties`). O sistema criará as tabelas automaticamente.
-
-   ```sql
-   CREATE DATABASE quickstock;
-   ```
-
-3. **Configure as credenciais (Opcional):**
-   Edite o arquivo `src/main/resources/application.properties` se o seu usuário/senha do Postgres for diferente de `postgres`/`admin`.
-
-4. **Execute a aplicação:**
-
-   * **No Windows:**
-
-     ```bash
-     mvnw.cmd spring-boot:run
-     ```
-
-   * **No Linux/Mac:**
-
-     ```bash
-     ./mvnw spring-boot:run
-     ```
-
-A API estará rodando em: `http://localhost:8081`
-
-## 🧪 Dados de Demonstração (Seeders)
-
-Ao iniciar a aplicação pela primeira vez, o sistema executa scripts automáticos (`DemoSeedRunner`, `MarketplaceDataFixRunner`, etc.) que populam o banco com dados de teste.
-
-Você pode acessar o sistema imediatamente usando a conta de demonstração configurada no código:
-
-* **E-mail:** `demo@quickstock.com`
-* **Senha:** `demo1234`
-* **Perfil:** Cliente e Fornecedor (Acesso completo às abas)
-
-*A base também será populada com distribuidores parceiros (Casa dos Vinhos, Cervejaria Caruaru, Whisky Labs) e catálogos de produtos prontos para teste.*
-
-## 📚 Documentação da API (Swagger)
-
-A documentação interativa de todos os endpoints (rotas, parâmetros e DTOs) está disponível via Swagger UI.
-
-Com a aplicação rodando, acesse:
-👉 [**http://localhost:8081/swagger**](http://localhost:8081/swagger)
-
-## 🏗️ Estrutura do Projeto
-
-O projeto segue a arquitetura padrão em camadas (N-Tier):
+A aplicação segue o padrão de arquitetura em camadas para garantir separação de responsabilidades e manutenibilidade:
 
 ```text
-src/main/java/com/quickstock/backend/
- ├── config/       # Configurações gerais (CORS, Seeders do BD, WebConfig)
- ├── controller/   # Endpoints da API REST
- ├── dto/          # Objetos de Transferência de Dados (Requests/Responses)
- ├── entity/       # Modelos de domínio mapeados para o banco (JPA)
- ├── exception/    # Tratamento global de erros (Controller Advice)
- ├── repository/   # Interfaces de acesso a dados (Spring Data JPA)
- └── service/      # Regras de negócio e lógica principal
-```
-
-## 🤝 Equipe de Desenvolvimento
-
-* Luan Feitosa Santos
-* José Ítalo S. C. Dantas
-* Marcelo Vitor Viana da Silva
-* Leticia Viviane Pereira da Silva
-
-## 📄 Licença
-
-Este projeto foi desenvolvido para fins acadêmicos e de aprendizado.
+src/main/java/com/quickstock
+ ┣ 📂 config      # Configurações globais (Segurança, Swagger, CORS)
+ ┣ 📂 controller  # Endpoints REST (Controladores)
+ ┣ 📂 dto         # Objetos de Transferência de Dados (Requisições/Respostas)
+ ┣ 📂 entity      # Modelos de Domínio persistidos no banco
+ ┣ 📂 exception   # Tratamento centralizado de erros e exceções
+ ┣ 📂 repository  # Interfaces de acesso a dados (Spring Data JPA)
+ ┣ 📂 security    # Filtros e lógicas de autenticação/autorização (JWT)
+ ┣ 📂 service     # Regras de negócio da aplicação
+ ┗ 📂 util        # Classes utilitárias diversas
