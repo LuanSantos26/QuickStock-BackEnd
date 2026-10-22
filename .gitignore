@@ -50,3 +50,7 @@ docs/node_modules/
 docs/.preview/
 # Backups locais do banco (podem conter dados reais)
 database/backups/
+
+# Variáveis locais de e-mail (podem conter senha SMTP)
+email.env
+.env

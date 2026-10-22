@@ -125,6 +125,17 @@ class ValidacaoDtoTest {
             assertThat(camposInvalidos(d)).containsExactly("email");
         }
 
+        @Test void emailPrecisaDeDominioComPonto() {
+            for (String invalido : List.of("ana@semdominio", "ana@dominio.", "ana@.com", "ana @teste.com", "ana@@teste.com")) {
+                UsuarioRequestDTO d = valido(); d.setEmail(invalido);
+                assertThat(camposInvalidos(d)).as(invalido).containsExactly("email");
+            }
+            for (String valido : List.of("ana@teste.local", "ana.souza+evento@empresa.com.br")) {
+                UsuarioRequestDTO d = valido(); d.setEmail(valido);
+                assertThat(camposInvalidos(d)).as(valido).isEmpty();
+            }
+        }
+
         @Test void senhaEntre6e100() {
             UsuarioRequestDTO d = valido(); d.setSenha("12345");
             assertThat(camposInvalidos(d)).containsExactly("senha");

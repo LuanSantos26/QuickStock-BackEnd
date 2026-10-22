@@ -175,6 +175,12 @@ spring.jpa.hibernate.ddl-auto=update
 spring.jpa.show-sql=true
 ```
 
+### 4. (Opcional) E-mail de boas-vindas
+
+Após o cadastro, o backend pode enviar um e-mail de boas-vindas (versões cliente e fornecedor). O envio vem
+desligado; para ligar, preencha as variáveis de ambiente do modelo [`email.env.example`](email.env.example).
+Configuração do provedor, teste local com Mailpit e produção: [`docs/EMAIL_BOAS_VINDAS.md`](docs/EMAIL_BOAS_VINDAS.md).
+
 ---
 
 ## ▶️ Executando a Aplicação

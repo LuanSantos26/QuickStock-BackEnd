@@ -1,0 +1,19 @@
+Seu evento começa com tudo em ordem.
+
+{{SAUDACAO}}
+
+É muito bom ter você no Stock4event! Agora você tem um aliado para organizar o estoque do seu evento e acompanhar a operação com mais praticidade, do abastecimento ao balcão.
+
+Controle o estoque de cada quiosque, acompanhe suas vendas e, quando precisar repor, consulte o catálogo das distribuidoras parceiras, confira preços e disponibilidade e faça seu pedido pelo aplicativo. No balcão, conte com o PDV para registrar vendas, calcular o troco e gerar comprovantes.
+
+Para começar, acesse sua conta, complete os dados do seu negócio e organize seus quiosques. O Stockinho vai acompanhar você nessa nova etapa!
+
+Menos imprevistos, mais tranquilidade para fazer seu evento acontecer.
+
+Acessar minha conta: {{URL_APP}}
+
+Até já,
+Equipe Stock4event
+
+--
+Você recebeu esta mensagem porque uma conta no Stock4event foi criada com este endereço de e-mail. Se não foi você, ignore este e-mail.

@@ -8,12 +8,16 @@ import lombok.Data;
 @Data
 public class UsuarioRequestDTO {
 
+    public static final String EMAIL_FORMATO = "^[^@\\s]+@[^@\\s.]+(\\.[^@\\s.]+)+$";
+
     @NotBlank(message = "Nome é obrigatório.")
     @Size(max = 100)
     private String nome;
 
     @NotBlank(message = "E-mail é obrigatório.")
-    @Email(message = "E-mail inválido.")
+    // Além da regra padrão do @Email, exige domínio com ponto (ex.: "ana@exemplo.com"; "ana@exemplo" não passa).
+    // Formato válido não prova que o endereço existe nem que pertence a quem se cadastrou.
+    @Email(message = "E-mail inválido.", regexp = EMAIL_FORMATO)
     @Size(max = 150)
     private String email;
 

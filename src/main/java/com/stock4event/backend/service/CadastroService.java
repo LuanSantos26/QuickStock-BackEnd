@@ -26,6 +26,7 @@ public class CadastroService {
     @Autowired private EmpresaRepository empresaRepository;
     @Autowired private UsuarioRepository usuarioRepository;
     @Autowired private PerfilRepository perfilRepository;
+    @Autowired private BoasVindasEmailService boasVindas;
 
     @Transactional
     public Usuario cadastrarConta(CadastroContaRequestDTO request) {
@@ -76,7 +77,11 @@ public class CadastroService {
             usuario.setCpf(somenteDigitos(usuarioDto.getCpf()));
         }
 
-        return usuarioRepository.save(usuario);
+        Usuario salvo = usuarioRepository.save(usuario);
+        // Agenda o e-mail de boas-vindas nesta mesma transação: ele só sai depois do commit,
+        // em segundo plano, e uma falha no envio não desfaz a conta.
+        boasVindas.registrar(salvo);
+        return salvo;
     }
 
     private String normalizarPerfil(String perfil) {

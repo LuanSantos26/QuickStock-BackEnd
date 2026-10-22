@@ -1,0 +1,19 @@
+Novas conexões. Mais oportunidades.
+
+{{SAUDACAO}}
+
+Seu negócio agora faz parte do Stock4event! Estamos felizes em conectar você a organizadores de eventos que precisam de agilidade para comprar e repor seus estoques.
+
+Cadastre seus produtos com informações claras, mantenha preços e disponibilidade atualizados e apresente seu catálogo aos clientes da plataforma. Acompanhe os pedidos recebidos e o andamento das entregas para manter cada etapa da operação organizada.
+
+Para dar o primeiro passo, acesse sua conta, complete o perfil da sua empresa e cadastre seus primeiros produtos. Um catálogo atualizado ajuda seus clientes a encontrar o que precisam na hora certa.
+
+Conte com o Stockinho para dar as boas-vindas a essa nova fase do seu negócio.
+
+Acessar minha conta: {{URL_APP}}
+
+Boas vendas,
+Equipe Stock4event
+
+--
+Você recebeu esta mensagem porque uma conta no Stock4event foi criada com este endereço de e-mail. Se não foi você, ignore este e-mail.
