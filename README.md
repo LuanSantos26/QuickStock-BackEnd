@@ -1,6 +1,6 @@
-# 🚀 QuickStock API
+# 🚀 Stock4Event API
 
-Backend do sistema **QuickStock**, uma plataforma completa para gerenciamento de estoque, vendas, eventos e controle financeiro.
+Backend do sistema **Stock4Event**, uma plataforma completa para gerenciamento de estoque, vendas, eventos e controle financeiro.
 
 A API foi desenvolvida utilizando **Java 17**, **Spring Boot** e **PostgreSQL**, seguindo uma arquitetura escalável baseada em camadas, preparada para futuras expansões e integração com aplicações web, mobile e sistemas de terceiros.
 
@@ -8,7 +8,7 @@ A API foi desenvolvida utilizando **Java 17**, **Spring Boot** e **PostgreSQL**,
 
 ## 📖 Sobre o Projeto
 
-O QuickStock foi criado para centralizar a gestão operacional de empresas que necessitam controlar:
+O Stock4Event foi criado para centralizar a gestão operacional de empresas que necessitam controlar:
 
 * Estoque de produtos
 * Vendas e pedidos
