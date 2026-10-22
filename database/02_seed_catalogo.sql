@@ -5,6 +5,11 @@
 -- Motivo: no data.sql original os INSERTs de produtos nao informam 'codigo'
 -- e falham em banco novo. O gatilho e removido no final.
 -- =====================================================================
+
+-- Os arquivos estão em UTF-8. Sem esta linha, o psql no Windows pode ler o script como WIN1252
+-- e falhar ("0x81 não tem equivalente") ou gravar acentos corrompidos ("Ã©").
+SET client_encoding = 'UTF8';
+
 CREATE OR REPLACE FUNCTION tmp_fill_codigo() RETURNS trigger AS $f$
 BEGIN
   IF NEW.codigo IS NULL OR NEW.codigo = '' THEN NEW.codigo := 'LEG-' || NEW.id; END IF;

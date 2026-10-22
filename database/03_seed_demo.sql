@@ -4,6 +4,11 @@
 -- fazem na inicializacao do backend. Idempotente (pode rodar mais de uma vez).
 --   login: demo@stock4event.com   senha: demo1234  (hash BCrypt $2a, custo 10)
 -- =====================================================================
+
+-- Os arquivos estão em UTF-8. Sem esta linha, o psql no Windows pode ler o script como WIN1252
+-- e falhar ("0x81 não tem equivalente") ou gravar acentos corrompidos ("Ã©").
+SET client_encoding = 'UTF8';
+
 INSERT INTO empresas (nome, cnpj, telefone, tipo, criado_em)
 SELECT 'Mercado Demo', '12.345.678/0001-95', '(81) 99999-0000', 'AMBOS', NOW()
 WHERE NOT EXISTS (SELECT 1 FROM empresas WHERE cnpj = '12.345.678/0001-95');
