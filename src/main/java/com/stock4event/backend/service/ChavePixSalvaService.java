@@ -64,7 +64,7 @@ public class ChavePixSalvaService {
                 .orElseThrow(() -> new CadastroException(HttpStatus.NOT_FOUND, "Chave PIX não encontrada."));
 
         if (!chave.getEmpresa().getId().equals(empresaId)) {
-            throw new CadastroException(HttpStatus.BAD_REQUEST, "Chave PIX não pertence à empresa informada.");
+            throw new CadastroException(HttpStatus.FORBIDDEN, "Chave PIX não pertence à empresa informada.");
         }
 
         chavePixRepository.delete(chave);

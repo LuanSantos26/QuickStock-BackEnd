@@ -2,17 +2,24 @@ package com.stock4event.backend.controller;
 
 import com.stock4event.backend.entity.Perfil;
 import com.stock4event.backend.repository.PerfilRepository;
-import jakarta.validation.Valid;
+import com.stock4event.backend.security.AcessoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+/**
+ * Perfis de acesso são dados de referência do sistema (seed "Admin").
+ * Leitura liberada para usuários logados; criar, alterar ou apagar perfis exigiria
+ * um administrador da plataforma, que o sistema não tem — por isso é recusado (403).
+ */
 @RestController
 @RequestMapping("/api/perfis")
 @CrossOrigin(origins = "*")
 public class PerfilController {
+
+    private static final String SOMENTE_LEITURA = "Perfis de acesso são definidos pelo sistema e não podem ser alterados.";
 
     @Autowired
     private PerfilRepository repository;
@@ -30,24 +37,17 @@ public class PerfilController {
     }
 
     @PostMapping
-    public ResponseEntity<Perfil> criar(@Valid @RequestBody Perfil perfil) {
-        return ResponseEntity.status(201).body(repository.save(perfil));
+    public ResponseEntity<Perfil> criar() {
+        throw AcessoService.proibido(SOMENTE_LEITURA);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Perfil> atualizar(@PathVariable Long id,
-                                             @Valid @RequestBody Perfil dados) {
-        return repository.findById(id).map(p -> {
-            p.setNome(dados.getNome());
-            p.setDescricao(dados.getDescricao());
-            return ResponseEntity.ok(repository.save(p));
-        }).orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<Perfil> atualizar(@PathVariable Long id) {
+        throw AcessoService.proibido(SOMENTE_LEITURA);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletar(@PathVariable Long id) {
-        if (!repository.existsById(id)) return ResponseEntity.notFound().build();
-        repository.deleteById(id);
-        return ResponseEntity.noContent().build();
+        throw AcessoService.proibido(SOMENTE_LEITURA);
     }
 }

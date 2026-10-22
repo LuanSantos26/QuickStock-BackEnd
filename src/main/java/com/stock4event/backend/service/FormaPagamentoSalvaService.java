@@ -103,7 +103,7 @@ public class FormaPagamentoSalvaService {
                 .orElseThrow(() -> new CadastroException(HttpStatus.NOT_FOUND, "Forma de pagamento não encontrada."));
 
         if (!forma.getEmpresa().getId().equals(empresaId)) {
-            throw new CadastroException(HttpStatus.BAD_REQUEST, "Forma de pagamento não pertence à empresa informada.");
+            throw new CadastroException(HttpStatus.FORBIDDEN, "Forma de pagamento não pertence à empresa informada.");
         }
         return forma;
     }

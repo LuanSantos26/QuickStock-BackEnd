@@ -80,7 +80,7 @@ public class CartaoPagamentoSalvoService {
                 .orElseThrow(() -> new CadastroException(HttpStatus.NOT_FOUND, "Cartão não encontrado."));
 
         if (!cartao.getEmpresa().getId().equals(empresaId)) {
-            throw new CadastroException(HttpStatus.BAD_REQUEST, "Cartão não pertence à empresa informada.");
+            throw new CadastroException(HttpStatus.FORBIDDEN, "Cartão não pertence à empresa informada.");
         }
 
         cartaoRepository.delete(cartao);

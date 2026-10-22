@@ -6,8 +6,10 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "produtos")
@@ -59,4 +61,9 @@ public class Produto {
     @Size(max = 40)
     @Column(name = "codigo_origem", length = 40)
     private String codigoOrigem;
+
+    /** Quando o produto foi cadastrado; ordena os "adicionados recentemente" no marketplace. */
+    @CreationTimestamp
+    @Column(name = "criado_em", updatable = false)
+    private LocalDateTime criadoEm;
 }

@@ -32,6 +32,6 @@ public class ProdutoRequestDTO {
     @DecimalMin("0.0")
     private BigDecimal estoque;
 
-    @NotNull
+    /** Opcional: a empresa vem do token; se informada, precisa ser a do usuário logado. */
     private Long empresaId;
 }

@@ -14,6 +14,7 @@ public interface PedidoRepository extends JpaRepository<Pedido, Long> {
     List<Pedido> findByBarracaId(Long barracaId);
     List<Pedido> findByBarracaIdAndStatus(Long barracaId, String status);
     List<Pedido> findByEnderecoEntregaId(Long enderecoEntregaId);
+    java.util.Optional<Pedido> findByChaveVenda(String chaveVenda);
 
     @Query("""
             SELECT p FROM Pedido p

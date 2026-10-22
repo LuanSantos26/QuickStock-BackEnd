@@ -53,4 +53,9 @@ public class EnderecoEntrega {
 
     @Column(nullable = false)
     private boolean principal = false;
+
+    /** Preenchidas pelo GeocodificacaoService; usadas para calcular a distância até as lojas. */
+    private Double latitude;
+
+    private Double longitude;
 }

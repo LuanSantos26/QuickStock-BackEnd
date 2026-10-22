@@ -6,6 +6,7 @@ import com.stock4event.backend.entity.Empresa;
 import com.stock4event.backend.entity.Produto;
 import com.stock4event.backend.repository.EmpresaRepository;
 import com.stock4event.backend.repository.ProdutoRepository;
+import com.stock4event.backend.security.AcessoService;
 import com.stock4event.backend.service.EstoqueProdutoService;
 import com.stock4event.backend.service.ProdutoService;
 import com.stock4event.backend.service.ProdutoUploadService;
@@ -28,25 +29,36 @@ public class ProdutoController {
     @Autowired private ProdutoUploadService uploadService;
     @Autowired private ProdutoService produtoService;
     @Autowired private EstoqueProdutoService estoqueProdutoService;
+    @Autowired private AcessoService acesso;
 
+    /** Mesmos tipos que o marketplace exibe como fornecedores. */
+    private static final List<String> TIPOS_FORNECEDOR = List.of("DISTRIBUIDOR", "AMBOS");
+
+    /** Produtos ativos da empresa do usuário logado. */
     @GetMapping
     public List<ProdutoResponseDTO> listar(@RequestParam(required = false) Long empresaId) {
-        if (empresaId != null) {
-            return repository.findByEmpresaIdAndAtivo(empresaId, 1)
-                    .stream()
-                    .map(ProdutoResponseDTO::new)
-                    .toList();
-        }
-        return repository.findAll()
+        return repository.findByEmpresaIdAndAtivo(acesso.resolverEmpresa(empresaId), 1)
                 .stream()
                 .map(ProdutoResponseDTO::new)
                 .toList();
     }
 
+    /**
+     * Produto da própria empresa, ou produto ativo de um fornecedor (o mesmo que o marketplace
+     * já mostra a qualquer usuário logado). Estoque interno de outras empresas não é exposto.
+     */
     @GetMapping("/{id}")
     public ResponseEntity<ProdutoResponseDTO> buscar(@PathVariable Long id) {
         return repository.findById(id)
-                .map(produto -> ResponseEntity.ok(new ProdutoResponseDTO(produto)))
+                .map(produto -> {
+                    boolean proprio = produto.getEmpresa().getId().equals(acesso.empresaId());
+                    boolean catalogoPublico = Integer.valueOf(1).equals(produto.getAtivo())
+                            && TIPOS_FORNECEDOR.contains(produto.getEmpresa().getTipo());
+                    if (!proprio && !catalogoPublico) {
+                        throw AcessoService.proibido(AcessoService.EMPRESA_DIFERENTE);
+                    }
+                    return ResponseEntity.ok(new ProdutoResponseDTO(produto));
+                })
                 .orElse(ResponseEntity.notFound().build());
     }
 
@@ -70,7 +82,7 @@ public class ProdutoController {
 
     @PostMapping
     public ResponseEntity<?> criar(@Valid @RequestBody ProdutoRequestDTO dto) {
-        var empresa = empresaRepository.findById(dto.getEmpresaId());
+        var empresa = empresaRepository.findById(acesso.resolverEmpresa(dto.getEmpresaId()));
         if (empresa.isEmpty()) {
             return ResponseEntity.badRequest().body(Map.of("erro", "Empresa não encontrada."));
         }
@@ -90,10 +102,8 @@ public class ProdutoController {
         }
 
         Produto produto = produtoOpt.get();
-        if (!produto.getEmpresa().getId().equals(dto.getEmpresaId())) {
-            return ResponseEntity.badRequest()
-                    .body(Map.of("erro", "Produto não pertence à empresa informada."));
-        }
+        acesso.resolverEmpresa(dto.getEmpresaId());
+        acesso.exigirEmpresa(produto.getEmpresa().getId());
 
         produto.setNome(dto.getNome());
         produto.setPrecoVenda(dto.getPrecoVenda());
@@ -109,7 +119,7 @@ public class ProdutoController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Map<String, String>> desativar(@PathVariable Long id,
                                                          @RequestParam(required = false) Long empresaId) {
-        produtoService.desativar(id, empresaId);
+        produtoService.desativar(id, acesso.resolverEmpresa(empresaId));
         return ResponseEntity.ok(Map.of("mensagem", "Produto removido."));
     }
 

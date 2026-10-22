@@ -1,15 +1,21 @@
 package com.stock4event.backend.controller;
 
 import com.stock4event.backend.dto.LoginResponseDTO;
+import com.stock4event.backend.dto.UsuarioAtualizacaoDTO;
+import com.stock4event.backend.dto.UsuarioRegistroDTO;
 import com.stock4event.backend.dto.UsuarioResponseDTO;
 import com.stock4event.backend.entity.Usuario;
+import com.stock4event.backend.exception.CadastroException;
 import com.stock4event.backend.repository.EmpresaRepository;
 import com.stock4event.backend.repository.PerfilRepository;
 import com.stock4event.backend.repository.UsuarioRepository;
+import com.stock4event.backend.security.AcessoService;
 import com.stock4event.backend.service.JwtService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -24,24 +30,20 @@ public class UsuarioController {
     @Autowired private PerfilRepository  perfilRepository;
     @Autowired private EmpresaRepository empresaRepository;
     @Autowired private JwtService jwtService;
+    @Autowired private AcessoService acesso;
 
+    /** Usuário dono do token (o filtro JWT já validou assinatura, expiração e se está ativo). */
     @GetMapping("/me")
-    public ResponseEntity<?> usuarioAtual(
-            @RequestHeader(value = "Authorization", required = false) String authorization) {
-        String token = extractBearerToken(authorization);
-        if (token == null || !jwtService.isTokenValid(token)) {
-            return ResponseEntity.status(401).body(Map.of("erro", "Token inválido ou expirado."));
-        }
-
-        return usuarioRepository.findById(jwtService.getUserId(token))
-                .filter(u -> u.getAtivo() == 1)
+    public ResponseEntity<?> usuarioAtual() {
+        return usuarioRepository.findById(acesso.usuarioId())
                 .<ResponseEntity<?>>map(u -> ResponseEntity.ok(new UsuarioResponseDTO(u)))
                 .orElse(ResponseEntity.status(401).body(Map.of("erro", "Usuário não encontrado.")));
     }
 
+    /** Usuários da empresa do usuário logado. */
     @GetMapping
     public List<UsuarioResponseDTO> listar() {
-        return usuarioRepository.findAll()
+        return usuarioRepository.findByEmpresaId(acesso.empresaId())
                 .stream()
                 .map(UsuarioResponseDTO::new)
                 .toList();
@@ -50,41 +52,42 @@ public class UsuarioController {
     @GetMapping("/{id}")
     public ResponseEntity<UsuarioResponseDTO> buscar(@PathVariable Long id) {
         return usuarioRepository.findById(id)
-                .map(u -> ResponseEntity.ok(new UsuarioResponseDTO(u)))
+                .map(u -> {
+                    acesso.exigirEmpresa(u.getEmpresa().getId());
+                    return ResponseEntity.ok(new UsuarioResponseDTO(u));
+                })
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @GetMapping("/empresa/{empresaId}")
     public List<UsuarioResponseDTO> listarPorEmpresa(@PathVariable Long empresaId) {
-        return usuarioRepository.findByEmpresaId(empresaId)
+        return usuarioRepository.findByEmpresaId(acesso.resolverEmpresa(empresaId))
                 .stream()
                 .map(UsuarioResponseDTO::new)
                 .toList();
     }
 
+    /** Cria outro usuário na empresa do usuário logado. */
     @PostMapping("/register")
-    public ResponseEntity<?> registrar(@Valid @RequestBody Map<String, Object> body) {
-        if (usuarioRepository.existsByEmail((String) body.get("email"))) {
+    public ResponseEntity<?> registrar(@Valid @RequestBody UsuarioRegistroDTO body) {
+        Long empresaId = acesso.resolverEmpresa(body.getEmpresaId());
+        String email = body.getEmail().trim().toLowerCase();
+
+        if (usuarioRepository.existsByEmailIgnoreCase(email)) {
             return ResponseEntity.status(409).body(Map.of("erro", "E-mail já cadastrado."));
         }
 
-        var perfil  = perfilRepository.findById(Long.parseLong(body.get("perfilId").toString()));
-        var empresa = empresaRepository.findById(Long.parseLong(body.get("empresaId").toString()));
-
-        if (perfil.isEmpty())  return ResponseEntity.badRequest().body(Map.of("erro", "Perfil não encontrado."));
-        if (empresa.isEmpty()) return ResponseEntity.badRequest().body(Map.of("erro", "Empresa não encontrada."));
-
-        String hash = org.springframework.security.crypto.bcrypt.BCrypt.hashpw(
-                (String) body.get("senha"),
-                org.springframework.security.crypto.bcrypt.BCrypt.gensalt()
-        );
+        var perfil = perfilRepository.findById(body.getPerfilId());
+        if (perfil.isEmpty()) return ResponseEntity.badRequest().body(Map.of("erro", "Perfil não encontrado."));
+        var empresa = empresaRepository.findById(empresaId)
+                .orElseThrow(() -> new CadastroException(HttpStatus.BAD_REQUEST, "Empresa não encontrada."));
 
         Usuario u = new Usuario();
-        u.setNome((String) body.get("nome"));
-        u.setEmail((String) body.get("email"));
-        u.setSenhaHash(hash);
+        u.setNome(body.getNome().trim());
+        u.setEmail(email);
+        u.setSenhaHash(BCrypt.hashpw(body.getSenha(), BCrypt.gensalt()));
         u.setPerfil(perfil.get());
-        u.setEmpresa(empresa.get());
+        u.setEmpresa(empresa);
         u.setAtivo(1);
 
         return ResponseEntity.status(201).body(new UsuarioResponseDTO(usuarioRepository.save(u)));
@@ -101,14 +104,13 @@ public class UsuarioController {
         if (novaSenha == null || novaSenha.length() < 6) {
             return ResponseEntity.badRequest().body(Map.of("erro", "A nova senha deve ter pelo menos 6 caracteres."));
         }
+        if (novaSenha.length() > 100) {
+            return ResponseEntity.badRequest().body(Map.of("erro", "A nova senha deve ter no máximo 100 caracteres."));
+        }
 
         return usuarioRepository.findByEmailIgnoreCase(email.trim())
                 .map(u -> {
-                    String hash = org.springframework.security.crypto.bcrypt.BCrypt.hashpw(
-                            novaSenha,
-                            org.springframework.security.crypto.bcrypt.BCrypt.gensalt()
-                    );
-                    u.setSenhaHash(hash);
+                    u.setSenhaHash(BCrypt.hashpw(novaSenha, BCrypt.gensalt()));
                     usuarioRepository.save(u);
                     return ResponseEntity.ok(Map.of("mensagem", "Senha atualizada."));
                 })
@@ -126,7 +128,7 @@ public class UsuarioController {
 
         return usuarioRepository.findByEmailIgnoreCase(email.trim())
                 .filter(u -> u.getAtivo() == 1)
-                .filter(u -> org.springframework.security.crypto.bcrypt.BCrypt.checkpw(senha, u.getSenhaHash()))
+                .filter(u -> BCrypt.checkpw(senha, u.getSenhaHash()))
                 .map(u -> {
                     String token = jwtService.generateToken(u);
                     return ResponseEntity.ok((Object) new LoginResponseDTO(
@@ -138,42 +140,42 @@ public class UsuarioController {
                 .orElse(ResponseEntity.status(401).body(Map.of("erro", "E-mail ou senha incorretos.")));
     }
 
+    /**
+     * Cada usuário altera apenas os próprios dados (nome, e-mail e senha).
+     * Perfil de acesso, empresa e status ativo não são alteráveis por aqui.
+     */
     @PutMapping("/{id}")
     public ResponseEntity<?> atualizar(@PathVariable Long id,
-                                       @RequestBody Map<String, Object> body) {
+                                       @Valid @RequestBody UsuarioAtualizacaoDTO body) {
+        if (!id.equals(acesso.usuarioId())) {
+            if (!usuarioRepository.existsById(id)) return ResponseEntity.notFound().build();
+            throw AcessoService.proibido("Você só pode alterar os seus próprios dados.");
+        }
+
         return usuarioRepository.findById(id).map(u -> {
-            if (body.containsKey("nome"))    u.setNome((String) body.get("nome"));
-            if (body.containsKey("email"))   u.setEmail((String) body.get("email"));
-            if (body.containsKey("ativo"))   u.setAtivo((Integer) body.get("ativo"));
-            if (body.containsKey("perfilId")) {
-                perfilRepository.findById(Long.parseLong(body.get("perfilId").toString()))
-                        .ifPresent(u::setPerfil);
+            if (body.getNome() != null) u.setNome(body.getNome().trim());
+            if (body.getEmail() != null) {
+                String email = body.getEmail().trim().toLowerCase();
+                if (!email.equalsIgnoreCase(u.getEmail()) && usuarioRepository.existsByEmailIgnoreCase(email)) {
+                    throw new CadastroException(HttpStatus.CONFLICT, "E-mail já cadastrado.");
+                }
+                u.setEmail(email);
             }
-            if (body.containsKey("senha")) {
-                String hash = org.springframework.security.crypto.bcrypt.BCrypt.hashpw(
-                        (String) body.get("senha"),
-                        org.springframework.security.crypto.bcrypt.BCrypt.gensalt()
-                );
-                u.setSenhaHash(hash);
+            if (body.getSenha() != null) {
+                u.setSenhaHash(BCrypt.hashpw(body.getSenha(), BCrypt.gensalt()));
             }
             return ResponseEntity.ok((Object) new UsuarioResponseDTO(usuarioRepository.save(u)));
         }).orElse(ResponseEntity.notFound().build());
     }
 
+    /** Desativa um usuário da mesma empresa (não apaga). */
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> desativar(@PathVariable Long id) {
-        if (!usuarioRepository.existsById(id)) return ResponseEntity.notFound().build();
-        usuarioRepository.findById(id).ifPresent(u -> {
-            u.setAtivo(0);
-            usuarioRepository.save(u);
-        });
+        Usuario u = usuarioRepository.findById(id).orElse(null);
+        if (u == null) return ResponseEntity.notFound().build();
+        acesso.exigirEmpresa(u.getEmpresa().getId());
+        u.setAtivo(0);
+        usuarioRepository.save(u);
         return ResponseEntity.noContent().build();
-    }
-
-    private String extractBearerToken(String authorization) {
-        if (authorization == null || !authorization.startsWith("Bearer ")) {
-            return null;
-        }
-        return authorization.substring(7).trim();
     }
 }

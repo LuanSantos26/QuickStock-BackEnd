@@ -1,14 +1,13 @@
 package com.stock4event.backend.dto;
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 
 @Data
 public class EnderecoEntregaRequestDTO {
 
-    @NotNull
+    /** Opcional: a empresa vem do token; se informada, precisa ser a do usuário logado. */
     private Long empresaId;
 
     @NotBlank

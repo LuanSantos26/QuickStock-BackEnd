@@ -57,7 +57,7 @@ public class SolicitacaoCompraService {
     public SolicitacaoCompraResponseDTO atualizarStatus(Long id, Long empresaFornecedoraId, String novoStatus) {
         SolicitacaoCompra solicitacao = buscar(id);
         if (!solicitacao.getEmpresaFornecedora().getId().equals(empresaFornecedoraId)) {
-            throw new CadastroException(HttpStatus.BAD_REQUEST, "Pedido não pertence ao fornecedor informado.");
+            throw new CadastroException(HttpStatus.FORBIDDEN, "Pedido não pertence ao fornecedor informado.");
         }
 
         String atual = statusAtual(solicitacao);
@@ -83,7 +83,7 @@ public class SolicitacaoCompraService {
     public SolicitacaoCompraResponseDTO cancelarPeloComprador(Long id, Long empresaCompradoraId) {
         SolicitacaoCompra solicitacao = buscar(id);
         if (!solicitacao.getEmpresaCompradora().getId().equals(empresaCompradoraId)) {
-            throw new CadastroException(HttpStatus.BAD_REQUEST, "Pedido não pertence à empresa informada.");
+            throw new CadastroException(HttpStatus.FORBIDDEN, "Pedido não pertence à empresa informada.");
         }
 
         solicitacao = atualizarStatusDemonstracao(solicitacao);
@@ -151,7 +151,7 @@ public class SolicitacaoCompraService {
                 .orElseThrow(() -> new CadastroException(HttpStatus.NOT_FOUND, "Pedido não encontrado."));
 
         if (!solicitacao.getEmpresaCompradora().getId().equals(empresaCompradoraId)) {
-            throw new CadastroException(HttpStatus.BAD_REQUEST, "Pedido não pertence à empresa informada.");
+            throw new CadastroException(HttpStatus.FORBIDDEN, "Pedido não pertence à empresa informada.");
         }
 
         solicitacao = atualizarStatusDemonstracao(solicitacao);
@@ -186,7 +186,7 @@ public class SolicitacaoCompraService {
                 .orElseThrow(() -> new CadastroException(HttpStatus.BAD_REQUEST, "Usuário não encontrado."));
 
         if (!usuario.getEmpresa().getId().equals(compradora.getId())) {
-            throw new CadastroException(HttpStatus.BAD_REQUEST, "Usuário não pertence à empresa compradora.");
+            throw new CadastroException(HttpStatus.FORBIDDEN, "Usuário não pertence à empresa compradora.");
         }
 
         String metodoPagamento = dto.getMetodoPagamento() != null

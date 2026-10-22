@@ -1,7 +1,6 @@
 package com.stock4event.backend.dto;
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -9,7 +8,7 @@ import lombok.Setter;
 @Setter
 public class StatusSolicitacaoRequestDTO {
 
-    @NotNull
+    /** Opcional: a empresa fornecedora vem do token; se informada, precisa ser a do usuário logado. */
     private Long empresaFornecedoraId;
 
     /** em_rota, entregue ou cancelada. */

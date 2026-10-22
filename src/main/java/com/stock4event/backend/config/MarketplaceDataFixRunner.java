@@ -65,11 +65,6 @@ public class MarketplaceDataFixRunner implements ApplicationRunner {
     private static final String IMG_CERVEJA_AMSTEL = "/uploads/produtos/cerveja-amstel-lata.png";
     private static final String IMG_CERVEJA_CERPA = "/uploads/produtos/cerveja-cerpa-export-long-neck.png";
     private static final String IMG_CERVEJA_PAULANER = "/uploads/produtos/cerveja-paulaner-munchen-weissbier.png";
-    private static final String IMG_VINHO_MAZZEI = "/uploads/produtos/vinho-mazzei-zisola.png";
-    private static final String IMG_VINHO_LOUIS_LATOUR = "/uploads/produtos/vinho-louis-latour.png";
-    private static final String IMG_VINHO_NATURELLE = "/uploads/produtos/vinho-naturelle-tinto-reserva.png";
-    private static final String IMG_VINHO_CARMIN = "/uploads/produtos/vinho-carmin-de-peumo.png";
-    private static final String IMG_VINHO_CAROLINA = "/uploads/produtos/vinho-carolina-sauvignon-blanc.png";
     private static final String IMG_CONHAQUE_MARTELL = "/uploads/produtos/conhaque-martell-lor.png";
     private static final String IMG_WHISKY_ROYAL_SALUTE = "/uploads/produtos/whisky-royal-salute-21.png";
     private static final String IMG_WHISKY_BALVENIE = "/uploads/produtos/whisky-balvenie-portwood-21.png";
@@ -79,7 +74,7 @@ public class MarketplaceDataFixRunner implements ApplicationRunner {
     private static final Map<String, EmpresaFix> EMPRESAS = Map.of(
             "30.001.001/0001-01", new EmpresaFix(
                     "Casa dos Vinhos",
-                    "Vinhos nacionais e importados selecionados para bares, restaurantes e revenda.",
+                    "Vinhos, espumantes e sucos de uva sem álcool, nacionais e importados, para bares, restaurantes e eventos.",
                     LOGO_CASA_DOS_VINHOS,
                     CAPA_CASA_DOS_VINHOS),
             "30.002.002/0001-02", new EmpresaFix(
@@ -91,21 +86,46 @@ public class MarketplaceDataFixRunner implements ApplicationRunner {
                     "Whisky Labs",
                     "Especialistas na distribuição de whiskies, conhaques e destilados premium para colecionadores e revendedores.",
                     LOGO_WHISKY_LABS,
-                    CAPA_WHISKY_LABS)
+                    CAPA_WHISKY_LABS),
+            "30.004.004/0001-04", new EmpresaFix(
+                    "SaborViva",
+                    "Águas, sucos e refrigerantes para bares, mercados e eventos. Bebidas para hoje, negócios para sempre.",
+                    "/uploads/empresas/saborviva-logo.png",
+                    "/uploads/empresas/saborviva-capa.png")
     );
 
     private static final Map<String, List<ProdutoFix>> PRODUTOS_POR_CNPJ = Map.of(
             "30.001.001/0001-01", List.of(
-                    new ProdutoFix("MKT-CDV-001", "Vinho Mazzei Zisola Sicilia Noto Rosso 750ml", bd("156.00"),
-                            "Vinho tinto siciliano Noto Rosso, garrafa 750 ml.", IMG_VINHO_MAZZEI, 150),
-                    new ProdutoFix("MKT-CDV-002", "Vinho Louis Latour Bourgogne Chardonnay 750 ml", bd("200.00"),
-                            "Vinho branco Bourgogne Chardonnay, garrafa 750 ml.", IMG_VINHO_LOUIS_LATOUR, 100),
-                    new ProdutoFix("MKT-CDV-003", "Vinho Naturelle Tinto Reserva 750 ML", bd("60.00"),
-                            "Vinho tinto reserva Naturelle, garrafa 750 ml.", IMG_VINHO_NATURELLE, 300),
-                    new ProdutoFix("MKT-CDV-004", "Vinho Carmin De Peumo Carmenere 750 ml", bd("666.00"),
-                            "Vinho tinto Carmenere Carmin De Peumo, garrafa 750 ml.", IMG_VINHO_CARMIN, 80),
-                    new ProdutoFix("MKT-CDV-005", "Vinho Carolina Reserva Sauvignon Blanc 750 ml", bd("60.00"),
-                            "Vinho branco Sauvignon Blanc reserva Carolina, garrafa 750 ml.", IMG_VINHO_CAROLINA, 200)
+                    new ProdutoFix("MKT-CDV-006", "Suco de uva integral Serra Gaúcha 1 L", bd("17.90"),
+                            "Linha Acessível · origem Brasil. Bebida sem álcool.", "/uploads/produtos/cdv-suco-de-uva-integral-serra-gaucha-1-l.png", 120),
+                    new ProdutoFix("MKT-CDV-007", "Suco de uva branca integral 1 L", bd("19.90"),
+                            "Linha Acessível · origem Brasil. Bebida sem álcool.", "/uploads/produtos/cdv-suco-de-uva-branca-integral-1-l.png", 90),
+                    new ProdutoFix("MKT-CDV-008", "Néctar de uva premium 1 L", bd("14.90"),
+                            "Linha Acessível · origem Brasil. Bebida sem álcool.", "/uploads/produtos/cdv-nectar-de-uva-premium-1-l.png", 150),
+                    new ProdutoFix("MKT-CDV-009", "Espumante de uva sem álcool 660 ml", bd("24.90"),
+                            "Linha Acessível · origem Brasil. Bebida sem álcool.", "/uploads/produtos/cdv-espumante-de-uva-sem-alcool-660-ml.png", 80),
+                    new ProdutoFix("MKT-CDV-010", "Suco de uva rosé integral 1 L", bd("22.90"),
+                            "Linha Acessível · origem Brasil. Bebida sem álcool.", "/uploads/produtos/cdv-suco-de-uva-rose-integral-1-l.png", 70),
+                    new ProdutoFix("MKT-CDV-011", "Vinho tinto desalcoolizado 750 ml", bd("49.90"),
+                            "Linha Intermediário · origem Brasil. Bebida sem álcool.", "/uploads/produtos/cdv-vinho-tinto-desalcoolizado-750-ml.png", 65),
+                    new ProdutoFix("MKT-CDV-012", "Vinho branco desalcoolizado 750 ml", bd("54.90"),
+                            "Linha Intermediário · origem Brasil. Bebida sem álcool.", "/uploads/produtos/cdv-vinho-branco-desalcoolizado-750-ml.png", 55),
+                    new ProdutoFix("MKT-CDV-013", "Espumante brut sem álcool 750 ml", bd("59.90"),
+                            "Linha Intermediário · origem Brasil. Bebida sem álcool.", "/uploads/produtos/cdv-espumante-brut-sem-alcool-750-ml.png", 60),
+                    new ProdutoFix("MKT-CDV-014", "Suco de uva orgânico reserva 750 ml", bd("39.90"),
+                            "Linha Intermediário · origem Brasil. Bebida sem álcool.", "/uploads/produtos/cdv-suco-de-uva-organico-reserva-750-ml.png", 75),
+                    new ProdutoFix("MKT-CDV-015", "Vinho rosé desalcoolizado 750 ml", bd("79.90"),
+                            "Linha Intermediário · origem Espanha. Bebida sem álcool.", "/uploads/produtos/cdv-vinho-rose-desalcoolizado-750-ml.png", 40),
+                    new ProdutoFix("MKT-CDV-016", "Espumante rosé sem álcool 750 ml", bd("119.90"),
+                            "Linha Premium · origem França. Bebida sem álcool.", "/uploads/produtos/cdv-espumante-rose-sem-alcool-750-ml.png", 30),
+                    new ProdutoFix("MKT-CDV-017", "Vinho tinto desalcoolizado reserva 750 ml", bd("129.90"),
+                            "Linha Premium · origem Espanha. Bebida sem álcool.", "/uploads/produtos/cdv-vinho-tinto-desalcoolizado-reserva-750-ml.png", 25),
+                    new ProdutoFix("MKT-CDV-018", "Vinho branco desalcoolizado Chardonnay 750 ml", bd("139.90"),
+                            "Linha Premium · origem Alemanha. Bebida sem álcool.", "/uploads/produtos/cdv-vinho-branco-desalcoolizado-chardonnay-750-ml.png", 22),
+                    new ProdutoFix("MKT-CDV-019", "Espumante sem álcool cuvée 750 ml", bd("149.90"),
+                            "Linha Premium · origem Itália. Bebida sem álcool.", "/uploads/produtos/cdv-espumante-sem-alcool-cuvee-750-ml.png", 18),
+                    new ProdutoFix("MKT-CDV-020", "Vinho tinto desalcoolizado premium 750 ml", bd("169.90"),
+                            "Linha Premium · origem França. Bebida sem álcool.", "/uploads/produtos/cdv-vinho-tinto-desalcoolizado-premium-750-ml.png", 15)
             ),
             "30.002.002/0001-02", List.of(
                     new ProdutoFix("MKT-CC-001", "Cerveja Heineken Long Neck 330ml", bd("5.99"),
@@ -130,6 +150,38 @@ public class MarketplaceDataFixRunner implements ApplicationRunner {
                             "Conhaque Martell L'Or de Jean Martell, garrafa 700 ml.", IMG_CONHAQUE_MARTELL, 80),
                     new ProdutoFix("MKT-WL-005", "Whisky Suntory Hibiki Japanese Harmony 700ml | Blended Premium Japonês", bd("729.90"),
                             "Whisky japonês Suntory Hibiki Japanese Harmony, garrafa 700 ml.", IMG_WHISKY_HIBIKI, 200)
+            ),
+            "30.004.004/0001-04", List.of(
+                    new ProdutoFix("MKT-SV-001", "Água mineral sem gás 500 ml", bd("2.50"),
+                            "Água mineral natural sem gás, garrafa 500 ml.", "/uploads/produtos/saborviva-agua-sem-gas-500ml.png", 500),
+                    new ProdutoFix("MKT-SV-002", "Água mineral com gás 500 ml", bd("3.50"),
+                            "Água mineral com gás, garrafa 500 ml.", "/uploads/produtos/saborviva-agua-com-gas-500ml.png", 350),
+                    new ProdutoFix("MKT-SV-003", "Água mineral sem gás 1,5 L", bd("5.00"),
+                            "Água mineral natural sem gás, garrafa 1,5 L.", "/uploads/produtos/saborviva-agua-sem-gas-1-5l.png", 250),
+                    new ProdutoFix("MKT-SV-004", "Água mineral galão 5 L", bd("12.00"),
+                            "Água mineral natural sem gás, galão 5 L.", "/uploads/produtos/saborviva-agua-galao-5l.png", 100),
+                    new ProdutoFix("MKT-SV-005", "Água de coco 330 ml", bd("6.50"),
+                            "Água de coco natural, caixinha 330 ml.", "/uploads/produtos/saborviva-agua-de-coco-330ml.png", 180),
+                    new ProdutoFix("MKT-SV-006", "Suco de laranja 1 L", bd("9.90"),
+                            "Suco de laranja 100% fruta, caixa 1 L.", "/uploads/produtos/saborviva-suco-laranja-1l.png", 200),
+                    new ProdutoFix("MKT-SV-007", "Suco de uva integral 1 L", bd("14.90"),
+                            "Suco de uva integral 100% fruta, caixa 1 L.", "/uploads/produtos/saborviva-suco-uva-integral-1l.png", 150),
+                    new ProdutoFix("MKT-SV-008", "Suco de maçã 1 L", bd("10.50"),
+                            "Suco de maçã 100% fruta, caixa 1 L.", "/uploads/produtos/saborviva-suco-maca-1l.png", 180),
+                    new ProdutoFix("MKT-SV-009", "Suco de manga 1 L", bd("8.90"),
+                            "Suco de manga 100% fruta, caixa 1 L.", "/uploads/produtos/saborviva-suco-manga-1l.png", 220),
+                    new ProdutoFix("MKT-SV-010", "Suco de maracujá 1 L", bd("9.50"),
+                            "Suco de maracujá 100% fruta, caixa 1 L.", "/uploads/produtos/saborviva-suco-maracuja-1l.png", 180),
+                    new ProdutoFix("MKT-SV-011", "Coca-Cola Original 2 L", bd("11.90"),
+                            "Refrigerante Coca-Cola sabor original, garrafa 2 L.", "/uploads/produtos/saborviva-coca-cola-original-2l.png", 450),
+                    new ProdutoFix("MKT-SV-012", "Coca-Cola Zero 2 L", bd("11.90"),
+                            "Refrigerante Coca-Cola zero açúcar, garrafa 2 L.", "/uploads/produtos/saborviva-coca-cola-zero-2l.png", 300),
+                    new ProdutoFix("MKT-SV-013", "Guaraná Antarctica 2 L", bd("9.50"),
+                            "Refrigerante Guaraná Antarctica, garrafa 2 L.", "/uploads/produtos/saborviva-guarana-antarctica-2l.png", 500),
+                    new ProdutoFix("MKT-SV-014", "Sprite 2 L", bd("9.90"),
+                            "Refrigerante Sprite sabor limão, garrafa 2 L.", "/uploads/produtos/saborviva-sprite-2l.png", 400),
+                    new ProdutoFix("MKT-SV-015", "Fanta Laranja 2 L", bd("9.50"),
+                            "Refrigerante Fanta sabor laranja, garrafa 2 L.", "/uploads/produtos/saborviva-fanta-laranja-2l.png", 400)
             )
     );
 

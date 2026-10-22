@@ -21,7 +21,7 @@ public class ProdutoService {
                 .orElseThrow(() -> new CadastroException(HttpStatus.NOT_FOUND, "Produto não encontrado."));
 
         if (empresaId != null && !produto.getEmpresa().getId().equals(empresaId)) {
-            throw new CadastroException(HttpStatus.BAD_REQUEST, "Produto não pertence à empresa informada.");
+            throw new CadastroException(HttpStatus.FORBIDDEN, "Produto não pertence à empresa informada.");
         }
 
         if (produto.getAtivo() != null && produto.getAtivo() == 0) {

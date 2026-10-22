@@ -43,9 +43,10 @@ public class BarracaService {
                 .toList();
     }
 
-    public BarracaResponseDTO buscarPorId(Long id) {
+    public BarracaResponseDTO buscarPorId(Long id, Long empresaId) {
         Barraca barraca = barracaRepository.findById(id)
                 .orElseThrow(() -> new CadastroException(HttpStatus.NOT_FOUND, "Barraquinha não encontrada."));
+        validarPertenceEmpresa(barraca, empresaId);
         return toResponse(barraca);
     }
 
@@ -58,7 +59,7 @@ public class BarracaService {
                 .orElseThrow(() -> new CadastroException(HttpStatus.BAD_REQUEST, "Responsável não encontrado."));
 
         if (!responsavel.getEmpresa().getId().equals(empresa.getId())) {
-            throw new CadastroException(HttpStatus.BAD_REQUEST, "Responsável não pertence à empresa informada.");
+            throw new CadastroException(HttpStatus.FORBIDDEN, "Responsável não pertence à empresa informada.");
         }
 
         Evento evento = obterOuCriarEventoPadrao(empresa);
@@ -93,10 +94,11 @@ public class BarracaService {
     }
 
     @Transactional
-    public BarracaResponseDTO sincronizarEstoque(Long barracaId, List<EstoqueItemRequestDTO> itens) {
+    public BarracaResponseDTO sincronizarEstoque(Long barracaId, Long empresaId, List<EstoqueItemRequestDTO> itens) {
         Barraca barraca = barracaRepository.findById(barracaId)
                 .orElseThrow(() -> new CadastroException(HttpStatus.NOT_FOUND, "Barraquinha não encontrada."));
 
+        validarPertenceEmpresa(barraca, empresaId);
         sincronizarEstoque(barraca, itens);
         return toResponse(barraca);
     }
@@ -144,7 +146,7 @@ public class BarracaService {
                     ));
 
             if (!produto.getEmpresa().getId().equals(empresaId)) {
-                throw new CadastroException(HttpStatus.BAD_REQUEST, "Produto não pertence à empresa.");
+                throw new CadastroException(HttpStatus.FORBIDDEN, "Produto não pertence à empresa.");
             }
 
             EstoqueBarraca estoque = estoqueRepository
@@ -164,7 +166,7 @@ public class BarracaService {
 
     private void validarPertenceEmpresa(Barraca barraca, Long empresaId) {
         if (!barraca.getEvento().getEmpresa().getId().equals(empresaId)) {
-            throw new CadastroException(HttpStatus.BAD_REQUEST, "Barraquinha não pertence à empresa informada.");
+            throw new CadastroException(HttpStatus.FORBIDDEN, "Barraquinha não pertence à empresa informada.");
         }
     }
 

@@ -92,7 +92,7 @@ public class EnderecoEntregaService {
     public EnderecoEntrega validarEnderecoDaEmpresa(Long enderecoId, Long empresaId) {
         EnderecoEntrega endereco = buscarPorId(enderecoId);
         if (!endereco.getEmpresa().getId().equals(empresaId)) {
-            throw new CadastroException(HttpStatus.BAD_REQUEST, "Endereço não pertence à empresa compradora.");
+            throw new CadastroException(HttpStatus.FORBIDDEN, "Endereço não pertence à empresa compradora.");
         }
         return endereco;
     }

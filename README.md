@@ -153,6 +153,17 @@ cd quickstock-backend
 CREATE DATABASE stock4event;
 ```
 
+Com o banco vazio, o backend cria as tabelas e os dados iniciais sozinho ao subir. Se preferir montar o banco antes, ou restaurar o banco oficial, use os scripts da pasta [`database/`](database/GUIA_DE_USO.md):
+
+```bash
+export PGPASSWORD=sua_senha
+cd database
+./build_from_scratch.sh                         # recria do zero (schema + catálogo + conta demo)
+./restore_stock4event.sh stock4event_full.sql   # ou restaura o dump oficial
+```
+
+A pasta também tem o diagrama ER (`stock4event_er.png`), o script de backup e o guia completo de uso do banco.
+
 ### 3. Configurar o application.properties
 
 ```properties
@@ -237,6 +248,25 @@ jwt.expiration-ms=86400000
 2. API gera token JWT
 3. Cliente envia token no header Authorization
 4. API valida o token e autoriza o acesso
+
+### Regras de acesso (Spring Security)
+
+* **Públicas:** `POST /api/usuarios/login`, `POST /api/cadastro`, `POST /api/usuarios/recuperar-senha`, `GET /uploads/**` e o Swagger quando `stock4event.seguranca.swagger-publico=true`.
+* **Todo o resto exige** `Authorization: Bearer <token>`, com assinatura e expiração conferidas e usuário ativo. Sem token válido: **401**.
+* **A empresa vem do token, não do app.** Se um `empresaId` (ou `empresaCompradoraId`/`empresaFornecedoraId`) diferente da empresa do usuário for enviado em parâmetro ou corpo, a resposta é **403**. Sem o parâmetro, vale a empresa do token.
+* Registros de outra empresa (consultar, alterar, excluir) respondem **403** e o banco não muda.
+* Campos controlados pelo servidor (empresa dona, perfil, status ativo, operador, tipo e total de pedido, status inicial de pagamento) não são aceitos do cliente.
+
+### Testes automatizados
+
+Os testes usam um banco **exclusivo**, `stock4event_test`, criado automaticamente e recriado a cada execução (os testes recusam qualquer banco que não termine em `_test`).
+
+```bash
+mvnw.cmd test        # Windows
+./mvnw test          # Linux / macOS
+```
+
+Variáveis opcionais: `TEST_DB_HOST`, `TEST_DB_PORT`, `TEST_DB_NAME`, `TEST_DB_USER`, `TEST_DB_PASSWORD` (padrão: localhost, 5432, stock4event_test, postgres, admin).
 
 ---
 

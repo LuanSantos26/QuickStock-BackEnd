@@ -1,7 +1,9 @@
 package com.stock4event.backend.repository;
 
 import com.stock4event.backend.entity.EstoqueBarraca;
+import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -18,4 +20,9 @@ public interface EstoqueBarracaRepository extends JpaRepository<EstoqueBarraca, 
     @Modifying
     @Query("DELETE FROM EstoqueBarraca e WHERE e.produto.id = :produtoId")
     void deleteByProdutoId(@Param("produtoId") Long produtoId);
+
+    /** Lê o estoque do produto no quiosque bloqueando a linha até o fim da transação. */
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT e FROM EstoqueBarraca e WHERE e.barraca.id = :barracaId AND e.produto.id = :produtoId")
+    Optional<EstoqueBarraca> findParaAtualizar(@Param("barracaId") Long barracaId, @Param("produtoId") Long produtoId);
 }

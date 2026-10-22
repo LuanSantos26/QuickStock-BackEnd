@@ -48,3 +48,5 @@ Desktop.ini
 # Geração do relatório (dependências locais)
 docs/node_modules/
 docs/.preview/
+# Backups locais do banco (podem conter dados reais)
+database/backups/

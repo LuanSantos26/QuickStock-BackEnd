@@ -15,7 +15,8 @@ import org.springframework.transaction.annotation.Transactional;
  * Conta de apresentação (administradora, perfil cliente e fornecedor), com endereço,
  * cartão e PIX já cadastrados, para o pedido de demo ser reproduzível.
  * Idempotente: só cria o que faltar.
- * A empresa fica como CLIENTE para não aparecer como loja vazia no marketplace.
+ * A empresa é AMBOS (cliente e fornecedora), como o cadastro faz para contas "Cliente e fornecedor":
+ * o que for cadastrado na visão de fornecedor aparece na vitrine para os clientes.
  * Roda antes do FormaPagamentoSeedRunner (@Order 91), que cria as formas de pagamento.
  */
 @Component
@@ -55,6 +56,10 @@ public class DemoSeedRunner implements ApplicationRunner {
     @Transactional
     public void run(ApplicationArguments args) {
         Empresa empresa = empresaRepository.findByCnpj(DEMO_CNPJ).orElseGet(this::criarEmpresa);
+        if (!"AMBOS".equals(empresa.getTipo())) {
+            empresa.setTipo("AMBOS");
+            empresa = empresaRepository.save(empresa);
+        }
 
         Perfil perfilAdmin = perfilRepository.findByNomeIgnoreCase("Admin").orElse(null);
         if (perfilAdmin == null) {
@@ -121,7 +126,7 @@ public class DemoSeedRunner implements ApplicationRunner {
         empresa.setNome("Mercado Demo");
         empresa.setCnpj(DEMO_CNPJ);
         empresa.setTelefone("(81) 99999-0000");
-        empresa.setTipo("CLIENTE");
+        empresa.setTipo("AMBOS");
         return empresaRepository.save(empresa);
     }
 }

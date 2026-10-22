@@ -86,4 +86,29 @@ public class Pedido {
     @CreationTimestamp
     @Column(name = "criado_em", updatable = false)
     private LocalDateTime criadoEm;
+
+    // ── Venda finalizada no PDV ───────────────────────────────────────────
+
+    /** Chave de idempotência gerada pelo app para cada venda; impede registrar a mesma venda duas vezes. */
+    @Size(max = 64)
+    @Column(name = "chave_venda", length = 64, unique = true)
+    private String chaveVenda;
+
+    /** Valor entregue pelo cliente (apenas pagamento em dinheiro). */
+    @Column(name = "valor_recebido", precision = 10, scale = 2)
+    private BigDecimal valorRecebido;
+
+    /** Troco calculado pelo servidor (apenas pagamento em dinheiro). */
+    @Column(precision = 10, scale = 2)
+    private BigDecimal troco;
+
+    /** Identificação opcional do consumidor final. */
+    @Size(max = 100)
+    @Column(name = "cliente_nome", length = 100)
+    private String clienteNome;
+
+    /** CPF ou CNPJ opcional do consumidor final, só dígitos. */
+    @Size(max = 14)
+    @Column(name = "cliente_documento", length = 14)
+    private String clienteDocumento;
 }

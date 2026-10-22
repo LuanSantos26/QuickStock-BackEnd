@@ -10,4 +10,7 @@ import java.util.List;
 public interface BarracaRepository extends JpaRepository<Barraca, Long> {
     List<Barraca> findByEventoId(Long eventoId);
     List<Barraca> findByEvento_EmpresaIdAndAtiva(Long empresaId, Integer ativa);
+
+    /** Quiosques ativos das outras empresas (vitrine "Quiosques disponíveis"), mais novos primeiro. */
+    List<Barraca> findByAtivaAndEvento_Empresa_IdNotOrderByIdDesc(Integer ativa, Long empresaId);
 }
