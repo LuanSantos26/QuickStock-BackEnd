@@ -1,298 +1,165 @@
-# 🚀 Stock4Event API
+📦 Stock4Event API Backend
 
-Backend do sistema **Stock4Event**, uma plataforma completa para gerenciamento de estoque, vendas, eventos e controle financeiro.
+O Stock4Event é uma plataforma completa e modular projetada para o gerenciamento de estoque, vendas de PDV (eventos/barracas), marketplace B2B (compradores e fornecedores), acompanhamento logístico e controle financeiro.
 
-A API foi desenvolvida utilizando **Java 17**, **Spring Boot** e **PostgreSQL**, seguindo uma arquitetura escalável baseada em camadas, preparada para futuras expansões e integração com aplicações web, mobile e sistemas de terceiros.
+Esta API foi desenvolvida seguindo os padrões RESTful, utilizando uma arquitetura em camadas escalável e segura.
 
----
+✨ Principais Funcionalidades
 
-## 📖 Sobre o Projeto
+👥 Gestão de Usuários e Segurança
 
-O Stock4Event foi criado para centralizar a gestão operacional de empresas que necessitam controlar:
+Cadastro de empresas com diferentes perfis: Cliente, Fornecedor ou Ambos.
 
-* Estoque de produtos
-* Vendas e pedidos
-* Clientes e fornecedores
-* Eventos e barracas
-* Fluxo financeiro
-* Upload de arquivos e imagens
-* Controle de acesso por perfil de usuário
+Autenticação e autorização seguras via JWT (JSON Web Token).
 
-O sistema foi projetado para ser modular, permitindo a inclusão de novos recursos sem impactar a estrutura principal da aplicação.
+Criptografia de senhas utilizando BCrypt.
 
----
+Fluxo de recuperação de senhas.
 
-## 🛠️ Tecnologias Utilizadas
+🏪 Marketplace B2B e Compras
 
-### Backend
+Catálogo de distribuidores integrados.
 
-* Java 17
-* Spring Boot 3.4
-* Spring Data JPA
-* Hibernate ORM
-* Maven
-* Lombok
+Sistema de solicitação de compras entre lojistas e fornecedores.
 
-### Banco de Dados
+Atualização de status de pedidos (Aguardando liberação, Em rota, Entregue).
 
-* PostgreSQL
+Integração de endereços via API ViaCEP.
 
-### Segurança
+📦 Gestão de Estoque e Produtos
 
-* JWT (JSON Web Token)
+Controle rigoroso de estoque com baixa e crédito automático de itens.
 
-### Documentação
+Códigos gerados dinamicamente para o catálogo de produtos.
 
-* Swagger / OpenAPI 3
-* SpringDoc OpenAPI
+Upload de imagens de produtos com armazenamento e validação de formato.
 
----
+🚚 Logística e Rastreio
 
-## ✨ Principais Funcionalidades
+Cadastro de caminhoneiros e rotas.
 
-### 👥 Gestão de Usuários
+Linha do tempo de entregas (Separação, Carregamento, Em trânsito, Entregue).
 
-* Cadastro de usuários
-* Login com autenticação JWT
-* Controle de permissões
-* Perfis de acesso
+Cálculo de status dinâmico e rastreio de motoristas.
 
-### 📦 Gestão de Estoque
+📊 Dashboard Financeiro
 
-* Cadastro de produtos
-* Controle de quantidade
-* Atualização automática de estoque
-* Gestão de fornecedores
+Resumo mensal de faturamento, custos e margem de lucro.
 
-### 🛒 Gestão de Vendas
+Controle de movimentação diária de estoque (StockDia).
 
-* Registro de pedidos
-* Histórico de vendas
-* Controle de status
-* Integração com estoque
+Gerenciamento de métodos de pagamento salvos (PIX, Cartões de Crédito/Débito mascarados).
 
-### 🎪 Gestão de Eventos
+🎪 PDV e Eventos
 
-* Cadastro de eventos
-* Organização de barracas
-* Distribuição de estoque por evento
-* Monitoramento de vendas em tempo real
+Criação de eventos e alocação de "Barracas/Quiosques".
 
-### 💰 Módulo Financeiro
+Transferência de estoque do depósito principal para as barracas.
 
-* Registro de pagamentos
-* Controle de receitas
-* Relatórios financeiros
-* Resumo mensal de faturamento
+Registro de pedidos de ponto de venda (PDV).
 
-### 🖼️ Upload de Arquivos
+🛠️ Tecnologias Utilizadas
 
-* Upload de imagens de produtos
-* Upload de logotipos
-* Armazenamento local configurável
+Linguagem: Java 17
 
----
+Framework: Spring Boot 3.4.0
 
-## 🏗️ Arquitetura do Projeto
+Banco de Dados: PostgreSQL
 
-A aplicação segue o padrão de arquitetura em camadas:
+Segurança: Spring Security + JWT (JJWT)
 
-```text
-src/main/java/com/quickstock
-│
-├── config
-├── controller
-├── dto
-├── entity
-├── exception
-├── repository
-├── security
-├── service
-└── util
-```
+ORM: Spring Data JPA / Hibernate
 
-### Descrição das Camadas
+Documentação: SpringDoc OpenAPI (Swagger UI)
 
-| Camada     | Responsabilidade           |
-| ---------- | -------------------------- |
-| controller | Endpoints REST             |
-| service    | Regras de negócio          |
-| repository | Acesso ao banco            |
-| entity     | Modelos persistidos        |
-| dto        | Objetos de transferência   |
-| config     | Configurações globais      |
-| exception  | Tratamento de erros        |
-| security   | Autenticação e autorização |
+Ferramentas: Maven, Lombok
 
----
+🚀 Como Executar o Projeto Localmente
 
-## 📋 Pré-requisitos
+Pré-requisitos
 
-Antes de executar o projeto, certifique-se de possuir:
+Java 17 ou superior
 
-* Java 17+
-* PostgreSQL 14+
-* Maven 3.9+
-* Git
+PostgreSQL 14 ou superior
 
----
+Maven 3.9+ (ou use o wrapper incluso)
 
-## ⚙️ Configuração Local
+Passo a Passo
 
-### 1. Clonar o repositório
+Clone o repositório:
 
-```bash
-git clone https://github.com/luansantos26/quickstock-backend.git
+git clone https://github.com/seu-usuario/stock4event-backend.git
+cd stock4event-backend
 
-cd quickstock-backend
-```
 
-### 2. Criar o banco de dados
+Configure o Banco de Dados:
+Crie um banco de dados no PostgreSQL chamado quickstock (nome configurado atualmente no arquivo application.properties). O sistema criará as tabelas automaticamente.
 
-```sql
 CREATE DATABASE quickstock;
-```
 
-### 3. Configurar o application.properties
 
-```properties
-spring.datasource.url=jdbc:postgresql://localhost:5432/quickstock
-spring.datasource.username=postgres
-spring.datasource.password=sua_senha
+Configure as credenciais (Opcional):
+Edite o arquivo src/main/resources/application.properties se o seu usuário/senha do Postgres for diferente de postgres/admin.
 
-spring.jpa.hibernate.ddl-auto=update
-spring.jpa.show-sql=true
-```
+Execute a aplicação:
 
----
+No Windows:
 
-## ▶️ Executando a Aplicação
-
-### Windows
-
-```bash
 mvnw.cmd spring-boot:run
-```
 
-### Linux / macOS
 
-```bash
+No Linux/Mac:
+
 ./mvnw spring-boot:run
-```
 
-A aplicação ficará disponível em:
 
-```text
-http://localhost:8081
-```
+A API estará rodando em: http://localhost:8081
 
-### Conta de demonstração
+🧪 Dados de Demonstração (Seeders)
 
-Ao iniciar, o `DemoSeedRunner` cria (se ainda não existir) uma conta administradora para a apresentação, com acesso às telas de cliente e de fornecedor, já com endereço, cartão e chave PIX:
+Ao iniciar a aplicação pela primeira vez, o sistema executa scripts automáticos (DemoSeedRunner, MarketplaceDataFixRunner, etc.) que populam o banco com dados de teste.
 
-* E-mail: `demo@quickstock.com`
-* Senha: `demo1234`
-* Empresa: Mercado Demo (perfil Cliente e fornecedor)
+Você pode acessar o sistema imediatamente usando a conta de demonstração configurada no código:
 
----
+E-mail: demo@quickstock.com
 
-## 📚 Documentação da API
+Senha: demo1234
 
-Após iniciar a aplicação:
+Perfil: Cliente e Fornecedor (Acesso completo às abas)
 
-### Swagger UI
+A base também será populada com distribuidores parceiros (Casa dos Vinhos, Cervejaria Caruaru, Whisky Labs) e catálogos de produtos prontos para teste.
 
-```text
-http://localhost:8081/swagger
-```
+📚 Documentação da API (Swagger)
 
-ou
+A documentação interativa de todos os endpoints (rotas, parâmetros e DTOs) está disponível via Swagger UI.
 
-```text
-http://localhost:8081/swagger-ui/index.html
-```
+Com a aplicação rodando, acesse:
+👉 http://localhost:8081/swagger
 
-### OpenAPI JSON
+🏗️ Estrutura do Projeto
 
-```text
-http://localhost:8081/v3/api-docs
-```
+O projeto segue a arquitetura padrão em camadas (N-Tier):
 
----
+src/main/java/com/quickstock/backend/
+ ├── config/       # Configurações gerais (CORS, Seeders do BD, WebConfig)
+ ├── controller/   # Endpoints da API REST
+ ├── dto/          # Objetos de Transferência de Dados (Requests/Responses)
+ ├── entity/       # Modelos de domínio mapeados para o banco (JPA)
+ ├── exception/    # Tratamento global de erros (Controller Advice)
+ ├── repository/   # Interfaces de acesso a dados (Spring Data JPA)
+ └── service/      # Regras de negócio e lógica principal
 
-## 🔒 Segurança
 
-A autenticação utiliza JWT (JSON Web Token).
+🤝 Equipe de Desenvolvimento
 
-Configuração padrão:
+Luan Feitosa Santos
 
-```properties
-jwt.secret=SUA_CHAVE_SECRETA
-jwt.expiration-ms=86400000
-```
+José Ítalo S. C. Dantas
 
-### Fluxo de autenticação
+Marcelo Vitor Viana da Silva
 
-1. Usuário realiza login
-2. API gera token JWT
-3. Cliente envia token no header Authorization
-4. API valida o token e autoriza o acesso
+Leticia Viviane Pereira da Silva
 
----
+📄 Licença
 
-## 📈 Roadmap
-
-Funcionalidades planejadas para futuras versões:
-
-* Dashboard analítico avançado
-* Relatórios em PDF
-* Integração com PIX
-* Integração com Mercado Pago
-* Controle de múltiplas filiais
-* Sistema de notificações
-* Auditoria de operações
-* Logs centralizados
-* Deploy em Docker
-* Integração CI/CD
-
----
-
-## 🤝 Contribuição
-
-Contribuições são bem-vindas.
-
-1. Faça um fork do projeto
-2. Crie uma branch para sua feature
-
-```bash
-git checkout -b feature/minha-feature
-```
-
-3. Commit suas alterações
-
-```bash
-git commit -m "feat: adiciona nova funcionalidade"
-```
-
-4. Envie para seu fork
-
-```bash
-git push origin feature/minha-feature
-```
-
-5. Abra um Pull Request
-
----
-
-## 👨‍💻 Equipe
-
-* Luan Feitosa Santos
-* José Ítalo S. C. Dantas
-* Marcelo Vitor Viana da Silva
-* Leticia Viviane Pereira da Silva
-
----
-
-## 📄 Licença
-
-Este projeto é destinado a fins acadêmicos e de aprendizado, podendo ser expandido para utilização comercial mediante adequações futuras.
+Este projeto foi desenvolvido para fins acadêmicos e de aprendizado.
