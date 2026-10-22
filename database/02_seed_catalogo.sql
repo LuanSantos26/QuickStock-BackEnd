@@ -21,6 +21,7 @@ ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS perfil_uso VARCHAR(30);
 UPDATE usuarios SET perfil_uso = 'Fornecedor' WHERE perfil_uso IS NULL OR perfil_uso = '';
 
 ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS cpf VARCHAR(14);
+ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS foto_url VARCHAR(500);
 
 -- ── Coluna de estoque (migração idempotente) ─────────────────────────────────
 ALTER TABLE produtos ADD COLUMN IF NOT EXISTS estoque NUMERIC(10, 3);

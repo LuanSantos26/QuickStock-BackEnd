@@ -24,6 +24,11 @@ public class ProdutoUploadService {
     private String uploadDir;
 
     public String salvarImagem(MultipartFile file) throws IOException {
+        return salvarImagem(file, "produtos");
+    }
+
+    /** Salva a imagem em uploads/{pasta} (ex.: "empresas" para logo e capa da loja). */
+    public String salvarImagem(MultipartFile file, String pasta) throws IOException {
         if (file == null || file.isEmpty()) {
             throw new IllegalArgumentException("Arquivo de imagem é obrigatório.");
         }
@@ -40,14 +45,22 @@ public class ProdutoUploadService {
 
         String extensao = resolverExtensao(contentType, nomeOriginal);
 
-        Path diretorio = Paths.get(uploadDir).toAbsolutePath().normalize();
+        Path produtosDir = Paths.get(uploadDir).toAbsolutePath().normalize();
+        Path diretorio = "produtos".equals(pasta) ? produtosDir : produtosDir.resolveSibling(pasta);
         Files.createDirectories(diretorio);
 
         String nomeArquivo = UUID.randomUUID() + "." + extensao;
         Path destino = diretorio.resolve(nomeArquivo);
         Files.copy(file.getInputStream(), destino);
 
-        return "/uploads/produtos/" + nomeArquivo;
+        return "/uploads/" + pasta + "/" + nomeArquivo;
+    }
+
+    /** Vazio (remover) ou imagem hospedada no próprio servidor (/uploads/...). URLs externas não valem. */
+    public static boolean caminhoImagemValido(String url) {
+        if (url == null) return false;
+        String valor = url.trim();
+        return valor.isEmpty() || (valor.startsWith("/uploads/") && !valor.contains(".."));
     }
 
     private boolean tipoPermitido(String contentType, String nomeOriginal) {

@@ -33,6 +33,7 @@ CREATE TABLE usuarios (
     ativo       INTEGER NOT NULL,
     perfil_uso  VARCHAR(30),
     cpf         VARCHAR(14),
+    foto_url    VARCHAR(500),
     criado_em   TIMESTAMP(6)
 );
 

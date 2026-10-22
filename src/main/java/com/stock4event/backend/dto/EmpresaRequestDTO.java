@@ -17,4 +17,14 @@ public class EmpresaRequestDTO {
 
     @Size(max = 20)
     private String telefone;
+
+    /** Opcionais (perfil da loja): null mantém o valor atual, texto vazio remove. */
+    @Size(max = 300, message = "Descrição deve ter no máximo 300 caracteres.")
+    private String descricao;
+
+    @Size(max = 500)
+    private String logoUrl;
+
+    @Size(max = 500)
+    private String capaUrl;
 }

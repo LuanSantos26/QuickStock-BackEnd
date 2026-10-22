@@ -55,6 +55,51 @@ class ProtecaoCamposEOperacoesRejeitadasIT extends IntegracaoBase {
     }
 
     @Test
+    void fornecedorAtualizaPerfilDaLojaComImagensEnviadas() throws Exception {
+        Conta c = novoFornecedor();
+        Map<String, Object> corpo = new HashMap<>();
+        corpo.put("nome", "Loja");
+        corpo.put("cnpj", c.empresa().getCnpj());
+        corpo.put("descricao", "  Bebidas geladas para eventos  ");
+        corpo.put("logoUrl", "/uploads/empresas/logo.jpg");
+        corpo.put("capaUrl", "/uploads/empresas/capa.jpg");
+        assertThat(status(comCorpo(auth(PUT("/api/empresas/" + c.empresaId()), c), corpo))).isEqualTo(200);
+        Empresa e = empresaRepository.findById(c.empresaId()).orElseThrow();
+        assertThat(e.getDescricao()).isEqualTo("Bebidas geladas para eventos");
+        assertThat(e.getLogoUrl()).isEqualTo("/uploads/empresas/logo.jpg");
+        assertThat(e.getCapaUrl()).isEqualTo("/uploads/empresas/capa.jpg");
+
+        // Sem os campos: mantém. Texto vazio: remove.
+        assertThat(status(comCorpo(auth(PUT("/api/empresas/" + c.empresaId()), c), Map.of(
+                "nome", "Loja", "cnpj", c.empresa().getCnpj())))).isEqualTo(200);
+        assertThat(empresaRepository.findById(c.empresaId()).orElseThrow().getLogoUrl())
+                .isEqualTo("/uploads/empresas/logo.jpg");
+        assertThat(status(comCorpo(auth(PUT("/api/empresas/" + c.empresaId()), c), Map.of(
+                "nome", "Loja", "cnpj", c.empresa().getCnpj(), "capaUrl", "", "descricao", "")))).isEqualTo(200);
+        e = empresaRepository.findById(c.empresaId()).orElseThrow();
+        assertThat(e.getCapaUrl()).isNull();
+        assertThat(e.getDescricao()).isNull();
+        assertThat(e.getLogoUrl()).isEqualTo("/uploads/empresas/logo.jpg");
+    }
+
+    @Test
+    void usuarioDefineFotoEnviadaMasIgnoraUrlExterna() throws Exception {
+        Conta c = novoCliente();
+        assertThat(status(comCorpo(auth(PUT("/api/usuarios/" + c.usuarioId()), c), Map.of(
+                "fotoUrl", "https://malicioso.example/foto.png")))).isEqualTo(200);
+        assertThat(usuarioRepository.findById(c.usuarioId()).orElseThrow().getFotoUrl()).isNull();
+
+        assertThat(status(comCorpo(auth(PUT("/api/usuarios/" + c.usuarioId()), c), Map.of(
+                "fotoUrl", "/uploads/usuarios/foto.jpg")))).isEqualTo(200);
+        assertThat(usuarioRepository.findById(c.usuarioId()).orElseThrow().getFotoUrl())
+                .isEqualTo("/uploads/usuarios/foto.jpg");
+
+        assertThat(status(comCorpo(auth(PUT("/api/usuarios/" + c.usuarioId()), c), Map.of(
+                "fotoUrl", "")))).isEqualTo(200);
+        assertThat(usuarioRepository.findById(c.usuarioId()).orElseThrow().getFotoUrl()).isNull();
+    }
+
+    @Test
     void produtoNovoIgnoraIdCodigoEStatusEnviadosPeloCliente() throws Exception {
         Conta c = novoFornecedor();
         Conta outra = novoFornecedor();

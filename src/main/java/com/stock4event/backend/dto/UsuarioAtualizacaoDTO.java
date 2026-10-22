@@ -24,4 +24,8 @@ public class UsuarioAtualizacaoDTO {
 
     @Size(min = 6, max = 100, message = "Senha deve ter entre 6 e 100 caracteres.")
     private String senha;
+
+    /** Foto enviada por POST /api/usuarios/upload; texto vazio remove a foto. */
+    @Size(max = 500)
+    private String fotoUrl;
 }

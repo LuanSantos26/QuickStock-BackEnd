@@ -11,12 +11,14 @@ import com.stock4event.backend.repository.PerfilRepository;
 import com.stock4event.backend.repository.UsuarioRepository;
 import com.stock4event.backend.security.AcessoService;
 import com.stock4event.backend.service.JwtService;
+import com.stock4event.backend.service.ProdutoUploadService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Map;
@@ -31,6 +33,7 @@ public class UsuarioController {
     @Autowired private EmpresaRepository empresaRepository;
     @Autowired private JwtService jwtService;
     @Autowired private AcessoService acesso;
+    @Autowired private ProdutoUploadService uploadService;
 
     /** Usuário dono do token (o filtro JWT já validou assinatura, expiração e se está ativo). */
     @GetMapping("/me")
@@ -144,6 +147,25 @@ public class UsuarioController {
      * Cada usuário altera apenas os próprios dados (nome, e-mail e senha).
      * Perfil de acesso, empresa e status ativo não são alteráveis por aqui.
      */
+    /** Envia a foto de perfil do usuário; devolve a URL para usar no PUT (campo fotoUrl). */
+    @PostMapping("/upload")
+    public ResponseEntity<?> uploadFoto(@RequestParam(value = "file", required = false) MultipartFile file) {
+        if (file == null || file.isEmpty()) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("erro", "Arquivo de imagem é obrigatório."));
+        }
+
+        try {
+            String imagemUrl = uploadService.salvarImagem(file, "usuarios");
+            return ResponseEntity.ok(Map.of("imagemUrl", imagemUrl));
+        } catch (IllegalArgumentException ex) {
+            return ResponseEntity.badRequest().body(Map.of("erro", ex.getMessage()));
+        } catch (Exception ex) {
+            return ResponseEntity.internalServerError()
+                    .body(Map.of("erro", "Não foi possível salvar a imagem."));
+        }
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<?> atualizar(@PathVariable Long id,
                                        @Valid @RequestBody UsuarioAtualizacaoDTO body) {
@@ -163,6 +185,10 @@ public class UsuarioController {
             }
             if (body.getSenha() != null) {
                 u.setSenhaHash(BCrypt.hashpw(body.getSenha(), BCrypt.gensalt()));
+            }
+            if (ProdutoUploadService.caminhoImagemValido(body.getFotoUrl())) {
+                String foto = body.getFotoUrl().trim();
+                u.setFotoUrl(foto.isEmpty() ? null : foto);
             }
             return ResponseEntity.ok((Object) new UsuarioResponseDTO(usuarioRepository.save(u)));
         }).orElse(ResponseEntity.notFound().build());

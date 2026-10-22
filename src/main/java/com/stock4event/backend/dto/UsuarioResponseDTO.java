@@ -20,6 +20,7 @@ public class UsuarioResponseDTO {
     private final LocalDateTime criadoEm;
     private final String        perfilUso;
     private final String        cpf;
+    private final String        fotoUrl;
 
     public UsuarioResponseDTO(Usuario u) {
         this.id        = u.getId();
@@ -33,5 +34,6 @@ public class UsuarioResponseDTO {
                 ? "Fornecedor"
                 : u.getPerfilUso();
         this.cpf       = u.getCpf();
+        this.fotoUrl   = u.getFotoUrl();
     }
 }

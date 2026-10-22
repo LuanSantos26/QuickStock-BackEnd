@@ -564,6 +564,7 @@ CREATE TABLE public.usuarios (
     ativo integer NOT NULL,
     perfil_uso character varying(30),
     cpf character varying(14),
+    foto_url character varying(500),
     criado_em timestamp(6) without time zone
 );
 

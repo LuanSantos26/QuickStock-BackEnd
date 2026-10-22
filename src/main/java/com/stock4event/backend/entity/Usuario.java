@@ -53,6 +53,10 @@ public class Usuario {
     @Size(max = 14)
     private String cpf;
 
+    @Size(max = 500)
+    @Column(name = "foto_url")
+    private String fotoUrl;
+
     @CreationTimestamp
     @Column(name = "criado_em", updatable = false)
     private LocalDateTime criadoEm;
