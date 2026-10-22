@@ -56,6 +56,8 @@ O sistema foi projetado para ser modular, permitindo a inclusão de novos recurs
 * Login com autenticação JWT
 * Controle de permissões
 * Perfis de acesso
+* Foto de perfil do usuário (`fotoUrl`)
+* E-mail de boas-vindas após o cadastro, nas versões cliente e fornecedor, enviado em segundo plano com novas tentativas e sem duplicidade ([guia](docs/EMAIL_BOAS_VINDAS.md))
 
 ### 📦 Gestão de Estoque
 
@@ -87,8 +89,10 @@ O sistema foi projetado para ser modular, permitindo a inclusão de novos recurs
 
 ### 🖼️ Upload de Arquivos
 
-* Upload de imagens de produtos
-* Upload de logotipos
+* Upload de imagens de produtos (`POST /api/produtos/upload`)
+* Upload da foto (logo) e da capa da loja (`POST /api/empresas/upload`), gravadas com a descrição pelo `PUT /api/empresas/{id}`
+* Upload da foto de perfil do usuário (`POST /api/usuarios/upload`)
+* Logo, capa e foto só aceitam imagens enviadas ao próprio servidor (`/uploads/...`); links externos são ignorados
 * Armazenamento local configurável
 
 ---
@@ -142,9 +146,9 @@ Antes de executar o projeto, certifique-se de possuir:
 ### 1. Clonar o repositório
 
 ```bash
-git clone https://github.com/luansantos26/quickstock-backend.git
+git clone https://github.com/LuanSantos26/Stock4Event-BackEnd.git
 
-cd quickstock-backend
+cd Stock4Event-BackEnd
 ```
 
 ### 2. Criar o banco de dados
@@ -273,6 +277,8 @@ mvnw.cmd test        # Windows
 ```
 
 Variáveis opcionais: `TEST_DB_HOST`, `TEST_DB_PORT`, `TEST_DB_NAME`, `TEST_DB_USER`, `TEST_DB_PASSWORD` (padrão: localhost, 5432, stock4event_test, postgres, admin).
+
+Os testes do e-mail de boas-vindas substituem o servidor de e-mail por um mock: nenhum e-mail real é enviado.
 
 ---
 

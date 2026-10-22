@@ -25,7 +25,8 @@ grupo = {  # cor por dominio
  "#E2F3DC":["produtos","estoque_barraca","barracas","eventos"],
  "#FDEBD0":["pedido","itens_pedido","pagamentos","solicitacoes_compra","itens_solicitacao_compra"],
  "#F4DDF0":["caminhoneiros","entregas_logistica"],
- "#FFF3C4":["enderecos_entrega","cartoes_pagamento_salvos","chaves_pix_salvas","formas_pagamento_salvas"]}
+ "#FFF3C4":["enderecos_entrega","cartoes_pagamento_salvos","chaves_pix_salvas","formas_pagamento_salvas"],
+ "#E7E3F7":["email_boas_vindas"]}
 cor = {t:c for c,ts in grupo.items() for t in ts}
 tabs = collections.OrderedDict()
 for t,c,ty,nn in cols: tabs.setdefault(t,[]).append((c,ty,nn=="t"))

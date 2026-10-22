@@ -6,8 +6,8 @@ Este guia ensina a ligar, consultar, fazer backup e recriar o banco. Os comandos
 
 | Arquivo | Para que serve |
 |---|---|
-| `01_schema.sql` | Cria as 18 tabelas, chaves primárias, estrangeiras e únicas |
-| `02_seed_catalogo.sql` | 3 distribuidoras parceiras e 15 produtos (é o `data.sql` do backend, com um ajuste explicado na seção 8) |
+| `01_schema.sql` | Cria as 19 tabelas, chaves primárias, estrangeiras e únicas |
+| `02_seed_catalogo.sql` | 4 distribuidoras parceiras (Casa dos Vinhos, Cervejaria Caruaru, Whisky Labs e SaborViva) e 40 produtos (é o `data.sql` do backend, com os ajustes explicados na seção 8) |
 | `03_seed_demo.sql` | Empresa e usuário de demonstração, endereço, cartão, PIX e formas de pagamento |
 | `build_from_scratch.sh` | Recria o banco do zero rodando os 3 arquivos acima |
 | `dump_stock4event.sh` | Gera backup (SQL completo, só estrutura e formato compacto) |
@@ -77,6 +77,38 @@ WHERE p.status <> 'cancelado'
 GROUP BY e.nome;
 ```
 
+### Novidades da estrutura (22/10/2026)
+
+| Onde | O que mudou | Para que serve |
+|---|---|---|
+| `usuarios.foto_url` | Coluna nova, `varchar(500)`, opcional | Foto de perfil do usuário (tela *Dados pessoais* do cliente) |
+| `empresas.descricao`, `logo_url`, `capa_url` | Já existiam; agora o próprio fornecedor edita | Tela *Perfil da loja*: descrição, foto e capa exibidas aos clientes |
+| `email_boas_vindas` | Tabela nova (19ª) | Registro de cada e-mail de boas-vindas enviado após o cadastro |
+
+A tabela `email_boas_vindas` guarda um registro por conta: `usuario_id` é único, o que impede dois
+e-mails de boas-vindas para a mesma pessoa. O vínculo com `usuarios` é lógico (sem chave estrangeira),
+por isso ela aparece sem ligações no diagrama ER. Colunas principais:
+
+| Coluna | Conteúdo |
+|---|---|
+| `tipo` | `CLIENTE` ou `FORNECEDOR` (versão do e-mail, pelo perfil salvo) |
+| `status` | `PENDENTE`, `ENVIANDO`, `ENVIADO`, `FALHOU` ou `INDETERMINADO` |
+| `tentativas` / `proxima_tentativa_em` | Controle das novas tentativas após falhas temporárias |
+| `ultimo_erro` | Motivo da última falha |
+| `enviado_em` | Quando o servidor de e-mail aceitou a mensagem |
+
+As imagens de foto, logo e capa ficam em arquivos na pasta `uploads/` do backend; o banco guarda só o
+caminho (ex.: `/uploads/usuarios/<uuid>.jpg`). Detalhes do e-mail: `docs/EMAIL_BOAS_VINDAS.md`.
+
+```sql
+-- Situação dos e-mails de boas-vindas
+SELECT usuario_id, destinatario, tipo, status, tentativas, ultimo_erro, enviado_em
+FROM email_boas_vindas ORDER BY id DESC;
+
+-- Quantos por status
+SELECT status, COUNT(*) FROM email_boas_vindas GROUP BY status;
+```
+
 ## 5. Backup e restauração
 
 ```bash
@@ -121,7 +153,7 @@ Há dois jeitos de ter o banco pronto, e os dois chegam ao mesmo resultado:
 1. **Pelos scripts desta pasta:** `build_from_scratch.sh` (ou restaurar o `stock4event_full.sql`).
 2. **Pelo próprio backend:** crie o banco vazio (`CREATE DATABASE stock4event;`) e suba o backend. O Hibernate cria as tabelas, o `data.sql` cadastra o catálogo e os runners criam a conta demo.
 
-Ao subir, o backend também ajusta o banco: troca os códigos provisórios `LEG-<id>` dos produtos pelos códigos oficiais `MKT-...` (`ProdutoCatalogoFixRunner`) e cria colunas novas das entidades (`ddl-auto=update`).
+Ao subir, o backend também ajusta o banco: troca os códigos provisórios `LEG-<id>` dos produtos pelos códigos oficiais `MKT-...` (`ProdutoCatalogoFixRunner`) e cria colunas e tabelas novas das entidades (`ddl-auto=update`). É assim que um banco antigo recebe `usuarios.foto_url` e a tabela `email_boas_vindas` sem precisar rodar nenhum script.
 
 **Correção feita no backend:** o `data.sql` falhava em banco **vazio**, porque inseria produtos sem o campo `codigo`, que é `NOT NULL`. Agora cada `INSERT` de produto informa o código oficial do catálogo. O `02_seed_catalogo.sql` continua usando um gatilho temporário para preencher `codigo`, então também funciona sozinho.
 
@@ -145,4 +177,9 @@ No DBeaver, clique com o botão direito no banco e escolha **View Diagram** para
 
 - Excluir um registro "pai" que tem "filhos" dá erro 23503. É a proteção das chaves estrangeiras funcionando. Veja a seção 5 do documento do modelo.
 - Nunca rode `DROP` ou `DELETE` sem `WHERE` num banco que importa. Teste primeiro dentro de uma transação: `BEGIN; ...comando...; ROLLBACK;`
-- Não suba a senha do banco nem o segredo JWT para o GitHub.
+- Não suba a senha do banco, o segredo JWT nem a senha do servidor de e-mail (SMTP) para o GitHub.
+- **Codificação no Windows:** os scripts `.sql` estão em UTF-8 e começam com `SET client_encoding = 'UTF8';`.
+  Sem isso, o `psql` do Windows lê o arquivo como WIN1252: o script pode parar com
+  `0x81 ... não tem equivalente na codificação "UTF8"` ou, pior, gravar acentos corrompidos (`Ã©` no lugar
+  de `é`). Os scripts `.sh` também definem `PGCLIENTENCODING=UTF8`. Ao criar um `.sql` novo, mantenha
+  essa primeira linha. (O `data.sql` do backend não precisa dela, porque é executado pelo Java.)
